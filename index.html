@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spot the Phish | Can you tell a phishing email from a real one?</title>
+<meta name="description" content="A free 5-minute phishing challenge. 10 realistic emails. Decide which are attacks and learn the red flags.">
+<meta property="og:title" content="Spot the Phish: the 5-minute phishing challenge">
+<meta property="og:description" content="10 realistic emails. Some are attacks. How many can you catch?">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0f17;--bg2:#0e1320;--panel:#121826;--panel2:#182033;--line:#26314a;--text:#e6ebf5;--muted:#8b96ad;--accent:#4f8cff;--accent2:#7c5cff;--good:#22c55e;--bad:#ef4444;--warn:#f5a524;--mono:'JetBrains Mono',ui-monospace,monospace}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;line-height:1.55}
+a{color:inherit}
+.container{max-width:1120px;margin:0 auto;padding:0 20px}
+.hidden{display:none!important}
+.muted{color:var(--muted)}
+p{margin:0 0 12px;color:#c7cfdf}
+h1,h2,h3{letter-spacing:-.03em}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:40;background:rgba(11,15,23,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+nav .container{display:flex;align-items:center;justify-content:space-between;height:64px;gap:16px}
+.logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:17px;text-decoration:none}
+.links{display:flex;gap:26px;font-size:14.5px}
+.links a{text-decoration:none;color:#c7cfdf}
+.links a:hover{color:#fff}
+.navcta{text-decoration:none;font-weight:700;font-size:14px;padding:9px 16px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.burger{display:none;background:none;border:1px solid var(--line);color:var(--text);border-radius:8px;padding:6px 10px;font-size:18px;cursor:pointer}
+.mobmenu{display:none;border-top:1px solid var(--line);padding:10px 20px 16px}
+.mobmenu a{display:block;padding:10px 0;text-decoration:none;color:#c7cfdf;border-bottom:1px solid var(--line)}
+
+/* HERO */
+.hero{position:relative;overflow:hidden;padding:84px 0 72px;background:radial-gradient(900px 480px at 85% 0%,rgba(124,92,255,.18),transparent 60%),radial-gradient(800px 420px at 0% 20%,rgba(79,140,255,.14),transparent 60%)}
+.hero .container{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--warn);border:1px solid rgba(245,165,36,.35);padding:5px 12px;border-radius:999px;margin-bottom:18px}
+.eyebrow i{width:7px;height:7px;border-radius:50%;background:var(--warn);box-shadow:0 0 10px var(--warn)}
+.hero h1{font-size:clamp(36px,5.6vw,62px);line-height:1.03;margin:0 0 18px}
+.grad{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .lead{font-size:clamp(16px,1.9vw,19px);color:#c7cfdf;max-width:540px;margin-bottom:28px}
+.ctas{display:flex;gap:12px;flex-wrap:wrap}
+.btn{appearance:none;border:0;cursor:pointer;font:700 16px Inter,sans-serif;padding:15px 22px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;text-decoration:none;display:inline-block;text-align:center}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--text)}
+.btn.full{width:100%}
+.stats{display:flex;gap:30px;margin-top:34px;flex-wrap:wrap}
+.stats b{display:block;font-size:26px;letter-spacing:-.02em}
+.stats span{font-size:13px;color:var(--muted)}
+/* hero visual: stacked mini emails */
+.stack{position:relative;height:360px}
+.mini{position:absolute;left:0;right:0;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:0 20px 50px rgba(0,0,0,.45)}
+.mini .r{display:flex;justify-content:space-between;font-size:13px}
+.mini .s{font-weight:700;font-size:14.5px;margin:3px 0 2px}
+.mini .a{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.mini .tag{font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:6px;font-weight:600}
+.tag.p{background:rgba(239,68,68,.15);color:var(--bad)} .tag.g{background:rgba(34,197,94,.15);color:var(--good)} .tag.q{background:rgba(245,165,36,.15);color:var(--warn)}
+.m1{top:0;transform:rotate(-2.5deg)} .m2{top:115px;transform:rotate(1.5deg);left:24px;right:-12px} .m3{top:230px;transform:rotate(-1deg);left:-8px;right:18px}
+
+/* SECTIONS */
+section.sec{padding:84px 0;border-top:1px solid var(--line)}
+section.alt{background:var(--bg2)}
+.sec-h{max-width:640px;margin:0 auto 40px;text-align:center}
+.sec-h .k{font-family:var(--mono);font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+.sec-h h2{font-size:clamp(28px,4vw,40px);line-height:1.1;margin:0 0 12px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.feat{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px}
+.feat .ic{width:42px;height:42px;border-radius:10px;display:grid;place-items:center;font-size:20px;background:var(--panel2);border:1px solid var(--line);margin-bottom:14px}
+.feat h3{font-size:17px;margin:0 0 6px}
+.feat p{font-size:14.5px;margin:0}
+.num{font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:8px}
+
+/* GAME */
+.game-wrap{max-width:580px;margin:0 auto}
+.gtop{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.pill{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);padding:4px 10px;border-radius:999px;white-space:nowrap}
+.progress{height:5px;background:var(--panel2);border-radius:99px;overflow:hidden;margin-bottom:14px}
+.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px}
+.card h3{font-size:24px;line-height:1.2;margin:0 0 12px}
+.steps{display:grid;gap:10px;margin:18px 0 22px}
+.steps div{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:14px;color:#c7cfdf}
+.steps b{color:var(--text)}
+.mailcard{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.mhead{padding:16px}
+.subj{font-size:18px;font-weight:700;line-height:1.3;margin:0 0 12px}
+.sender{display:flex;gap:10px;align-items:flex-start}
+.avatar{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:700;flex:none;color:#fff;font-size:14px}
+.who{flex:1;min-width:0;font-size:14px}
+.who b{font-size:15px}
+.addr{color:var(--muted);font-family:var(--mono);font-size:12px;word-break:break-all;display:block}
+.toggle{background:var(--panel2);border:1px solid var(--line);color:var(--accent);cursor:pointer;font:600 13px Inter;padding:7px 12px;border-radius:8px;margin-top:8px}
+.details{margin-top:10px;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:12px;font-family:var(--mono);font-size:12px;display:grid;grid-template-columns:92px 1fr;gap:5px 8px}
+.details span:nth-child(odd){color:var(--muted)}
+.details span{word-break:break-all}
+.pass{color:var(--good)} .fail{color:var(--bad)} .neutral{color:var(--warn)}
+.body{background:#fff;color:#1f2937;padding:18px 16px;font-size:15px;line-height:1.6}
+.body p{color:#1f2937;margin:0 0 12px}
+.body a.l{color:#1d4ed8;text-decoration:underline;cursor:pointer}
+.body .cta{display:inline-block;padding:11px 18px;border-radius:8px;color:#fff!important;text-decoration:none!important;font-weight:600;margin:4px 0 12px}
+.body .sig{color:#6b7280;font-size:13px}
+.body .logo{font-weight:800;font-size:17px;margin-bottom:10px}
+.body small{color:#6b7280}
+.attach{padding:12px 16px;display:flex;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line)}
+.att{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;cursor:pointer;width:100%}
+.att .ic{width:32px;height:32px;border-radius:6px;display:grid;place-items:center;font-size:10px;font-weight:700;color:#fff;font-family:var(--mono);flex:none}
+.hint{font-size:13px;color:var(--muted);text-align:center;margin:12px 0 0}
+.decide{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.big{appearance:none;border:0;cursor:pointer;font:800 17px Inter;padding:17px 10px;border-radius:14px}
+.big.red{background:var(--bad);color:#fff}
+.big.green{background:var(--good);color:#04210f}
+.verdict{margin-top:14px;border-radius:16px;padding:18px;border:1px solid var(--line);background:var(--panel)}
+.verdict h4{margin:0 0 8px;font-size:19px}
+.verdict.ok h4{color:var(--good)} .verdict.no h4{color:var(--bad)}
+.verdict ul{margin:8px 0 14px;padding-left:18px;font-size:14.5px;color:#c7cfdf}
+.verdict li{margin-bottom:6px}
+.verdict .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:12px}
+.result-score{font-size:72px;font-weight:800;letter-spacing:-.04em;line-height:1;margin:8px 0 6px}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.split div{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+.split b{display:block;font-size:24px}
+.split span{font-size:12.5px;color:var(--muted)}
+.rlist{display:grid;gap:8px;margin:14px 0 18px}
+.rrow{display:flex;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);font-size:13.5px}
+.dot{width:10px;height:10px;border-radius:50%;flex:none;margin-top:6px}
+
+/* lead form */
+.field{margin-bottom:14px}
+.field label{display:block;font-size:13.5px;font-weight:600;margin-bottom:6px}
+.field input{width:100%;background:var(--bg2);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:13px 14px;font:16px Inter,sans-serif;outline:none}
+.field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,140,255,.2)}
+.field input.bad{border-color:var(--bad)}
+.err{display:block;color:var(--bad);font-size:12.5px;margin-top:5px;min-height:0}
+.consent{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:#c7cfdf;margin:4px 0 6px;cursor:pointer}
+.consent input{margin-top:3px;width:18px;height:18px;accent-color:var(--accent);flex:none}
+#startBtn{margin-top:12px}
+
+/* sticky mobile decision bar */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(11,15,23,.94);backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:12px 14px calc(12px + env(safe-area-inset-bottom));transform:translateY(110%);transition:transform .2s}
+.bar.on{transform:none}
+.bar .in{max-width:580px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* sheet */
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:60;background:var(--bg2);border-top:1px solid var(--line);border-radius:16px 16px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom));transform:translateY(110%);transition:transform .2s;max-width:580px;margin:0 auto;box-shadow:0 -10px 40px rgba(0,0,0,.5)}
+.sheet.on{transform:none}
+.sheet .lbl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-family:var(--mono)}
+.sheet .url{font-family:var(--mono);font-size:14px;word-break:break-all;margin:8px 0 14px;color:#fff;background:var(--panel2);border:1px solid var(--line);padding:10px 12px;border-radius:10px}
+.sheet .url mark{background:rgba(245,165,36,.25);color:var(--warn);padding:0 2px;border-radius:3px}
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:55;opacity:0;pointer-events:none;transition:opacity .2s}
+.scrim.on{opacity:1;pointer-events:auto}
+
+/* checklist + faq */
+.check{display:flex;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+.check .n{font-family:var(--mono);font-weight:600;color:var(--warn);font-size:14px;flex:none;width:28px}
+.check h3{font-size:16px;margin:0 0 4px}
+.check p{font-size:14px;margin:0}
+.faq{max-width:760px;margin:0 auto;display:grid;gap:10px}
+details.q{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+details.q summary{cursor:pointer;font-weight:600;list-style:none;display:flex;justify-content:space-between;gap:12px}
+details.q summary::after{content:"+";color:var(--muted);font-size:20px;line-height:1}
+details.q[open] summary::after{content:"–"}
+details.q p{margin:10px 0 0;font-size:14.5px}
+.cta-band{text-align:center;padding:72px 20px;background:radial-gradient(700px 300px at 50% 0%,rgba(124,92,255,.2),transparent 70%);border-top:1px solid var(--line)}
+.cta-band h2{font-size:clamp(28px,4vw,42px);margin:0 0 12px}
+footer{border-top:1px solid var(--line);padding:28px 0 calc(28px + env(safe-area-inset-bottom));font-size:13px;color:var(--muted)}
+footer .container{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+@media (max-width:900px){
+  .hero .container{grid-template-columns:1fr}
+  .stack{display:none}
+  .grid3{grid-template-columns:1fr}
+  .links,.navcta{display:none}
+  .burger{display:block}
+  .mobmenu.open{display:block}
+  .decide.desk{display:none}
+  .hero{padding:56px 0 52px}
+  section.sec{padding:64px 0}
+}
+@media (min-width:901px){ .bar{display:none} }
+@media (max-width:640px){ .grid2{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a class="logo" href="#top">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 2l8 3v6c0 5-3.4 9.4-8 11-4.6-1.6-8-6-8-11V5l8-3z" stroke="url(#g)" stroke-width="2"/><path d="M8.5 12.5l2.5 2.5 4.5-5" stroke="#e6ebf5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="g" x1="0" y1="0" x2="24" y2="24"><stop stop-color="#4f8cff"/><stop offset="1" stop-color="#7c5cff"/></linearGradient></defs></svg>
+      Spot the Phish
+    </a>
+    <div class="links">
+      <a href="#how">How it works</a><a href="#play">Play</a><a href="#types">Attack types</a><a href="#checklist">Red flags</a><a href="#faq">FAQ</a>
+    </div>
+    <a class="navcta" href="#play">Take the challenge</a>
+    <button class="burger" id="burger" aria-label="Menu">☰</button>
+  </div>
+  <div class="mobmenu" id="mobmenu">
+    <a href="#how">How it works</a><a href="#play">Play the challenge</a><a href="#types">Attack types</a><a href="#checklist">Red flags checklist</a><a href="#faq">FAQ</a>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="container">
+    <div>
+      <div class="eyebrow"><i></i>Free 5-minute challenge</div>
+      <h1>Can you tell a <span class="grad">phishing email</span> from a real one?</h1>
+      <p class="lead">10 realistic emails land in your inbox. Some are attacks, some are genuine. Investigate each one like a security analyst and find out how phish-proof you really are.</p>
+      <div class="ctas">
+        <a class="btn" href="#play" id="heroStart">Start the challenge ▶</a>
+        <a class="btn ghost" href="#checklist">See the red flags</a>
+      </div>
+      <div class="stats">
+        <div><b>10</b><span>realistic emails</span></div>
+        <div><b>~5 min</b><span>to complete</span></div>
+        <div><b>Free</b><span>works on any phone</span></div>
+      </div>
+    </div>
+    <div class="stack" aria-hidden="true">
+      <div class="mini m1"><div class="r"><span class="muted">Nimbus IT Helpdesk</span><span class="tag q">?</span></div><div class="s">Your password expires in 2 hours</div><div class="a">it-support@nimbuslabs-helpdesk.com</div></div>
+      <div class="mini m2"><div class="r"><span class="muted">Priya Nair</span><span class="tag q">?</span></div><div class="s">Moving our 1:1 to Wednesday</div><div class="a">priya.nair@nimbuslabs.com</div></div>
+      <div class="mini m3"><div class="r"><span class="muted">Nimbus Payroll</span><span class="tag q">?</span></div><div class="s">Salary credit on hold: update bank details</div><div class="a">payroll@nlmbuslabs.com</div></div>
+    </div>
+  </div>
+</header>
+
+<section class="sec alt" id="how">
+  <div class="container">
+    <div class="sec-h"><div class="k">How it works</div><h2>Think like a security analyst</h2><p>You play Arjun, an engineer at Nimbus Labs. His real company email ends in <b style="font-family:var(--mono)">@nimbuslabs.com</b>.</p></div>
+    <div class="grid3">
+      <div class="feat"><div class="num">01</div><div class="ic">🔍</div><h3>Inspect the sender</h3><p>Open "Sender details" to see the real address, the reply-to and the SPF / DKIM / DMARC security checks.</p></div>
+      <div class="feat"><div class="num">02</div><div class="ic">🔗</div><h3>Check every link</h3><p>Tap any link or button to see where it really goes. The actual website is highlighted. Nothing opens.</p></div>
+      <div class="feat"><div class="num">03</div><div class="ic">🚩</div><h3>Make the call</h3><p>Phishing or Legit? You get instant feedback with the exact red flags (or green flags) you should have spotted.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="play">
+  <div class="container">
+    <div class="sec-h"><div class="k">The challenge</div><h2>Your inbox has 10 new emails</h2><p>Careful: not every email is a scam. Reporting everything costs points too.</p></div>
+    <div class="game-wrap">
+      <div class="gtop hidden" id="gtop"><span class="pill" id="pill">Email 1 of 10</span><span class="pill" id="scorePill">Score 0</span></div>
+      <div class="progress hidden" id="prog"><i id="progBar"></i></div>
+
+      <div id="start" class="card">
+        <h3>Enter your details to start</h3>
+        <p class="muted" style="font-size:14px">Takes 10 seconds. Then your inbox opens.</p>
+        <form id="leadForm" novalidate>
+          <p class="hidden" aria-hidden="true"><label>Leave this empty: <input id="fBot" name="website" tabindex="-1" autocomplete="off"></label></p>
+          <div class="field"><label for="fName">Full name</label><input id="fName" name="name" type="text" autocomplete="name" placeholder="e.g. Priya Sharma" required><span class="err" id="eName"></span></div>
+          <div class="field"><label for="fEmail">Email</label><input id="fEmail" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required><span class="err" id="eEmail"></span></div>
+          <div class="field"><label for="fPhone">Phone number</label><input id="fPhone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+91 98765 43210" required><span class="err" id="ePhone"></span></div>
+          <label class="consent"><input type="checkbox" id="fConsent" name="consent" value="yes" required><span>I agree to be contacted about cybersecurity training and resources. My details won't be sold or shared.</span></label>
+          <span class="err" id="eConsent"></span>
+          <button class="btn full" type="submit" id="startBtn">Open my inbox ▶</button>
+        </form>
+        <p class="muted" style="margin:14px 0 0;font-size:12.5px;text-align:center">All companies, people and domains in the challenge are fictional.</p>
+      </div>
+
+      <div id="game" class="hidden"><div id="mail"></div><div id="verdictBox"></div></div>
+
+      <div id="result" class="hidden">
+        <div class="card">
+          <span class="pill">Your result</span>
+          <div class="result-score grad" id="score"></div>
+          <h3 id="verdictH" style="margin-bottom:8px"></h3>
+          <p id="verdictP"></p>
+          <div class="split">
+            <div><b id="missed"></b><span>phishing emails you let through</span></div>
+            <div><b id="fa"></b><span>real emails you wrongly reported</span></div>
+          </div>
+          <div class="rlist" id="review"></div>
+          <div style="display:grid;gap:10px">
+            <a class="btn" href="#checklist">Learn the 6 red flags ↓</a>
+            <button class="btn ghost" id="copyBtn">Copy my score</button>
+            <button class="btn ghost" id="retryBtn">Play again</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec alt" id="types">
+  <div class="container">
+    <div class="sec-h"><div class="k">Know your enemy</div><h2>Six phishing attacks you'll meet in real life</h2><p>Every one of these is in the challenge.</p></div>
+    <div class="grid3">
+      <div class="feat"><div class="ic">🎭</div><h3>Look-alike domains</h3><p>nlmbuslabs.com instead of nimbuslabs.com, or nimbuslabs-helpdesk.com. One wrong letter is all it takes.</p></div>
+      <div class="feat"><div class="ic">👔</div><h3>CEO / boss fraud</h3><p>An "executive" on a personal email needs gift cards or an urgent transfer, and can't take calls.</p></div>
+      <div class="feat"><div class="ic">🧾</div><h3>Invoice fraud</h3><p>An overdue invoice with "updated bank details" and an attachment that isn't really a PDF.</p></div>
+      <div class="feat"><div class="ic">📁</div><h3>Fake file shares</h3><p>"A colleague shared Bonus_Ratings.xlsx." The sign-in page is a trap built to steal your password.</p></div>
+      <div class="feat"><div class="ic">🏦</div><h3>Spoofed bank alerts</h3><p>The From address looks perfect because it's forged. Only the security checks and the link reveal it.</p></div>
+      <div class="feat"><div class="ic">💸</div><h3>Payroll scams</h3><p>"Your salary is on hold, re-enter your bank details." Timed for the end of the month.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="checklist">
+  <div class="container">
+    <div class="sec-h"><div class="k">Red flags checklist</div><h2>6 checks before you click anything</h2><p>Screenshot this. It catches most attacks.</p></div>
+    <div class="grid2">
+      <div class="check"><div class="n">01</div><div><h3>Read the real domain</h3><p>Ignore the display name. Read the address after the @, letter by letter. nlmbuslabs ≠ nimbuslabs.</p></div></div>
+      <div class="check"><div class="n">02</div><div><h3>Check where links really go</h3><p>Link text can say anything. Hover or long-press to see the true destination; read the domain right to left.</p></div></div>
+      <div class="check"><div class="n">03</div><div><h3>Urgency means slow down</h3><p>"2 hours", "final notice", "salary on hold". Pressure is designed to stop you thinking.</p></div></div>
+      <div class="check"><div class="n">04</div><div><h3>Money or passwords? Verify separately</h3><p>Call or message the person on a number or channel you already trust, never one from the email.</p></div></div>
+      <div class="check"><div class="n">05</div><div><h3>Suspicious attachments</h3><p>.html files, password-protected .zip files and "enable macros" documents are classic payloads.</p></div></div>
+      <div class="check"><div class="n">06</div><div><h3>Never share OTPs or card details</h3><p>No real bank, employer or support team asks for them by email, SMS or phone. Ever.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec alt" id="faq">
+  <div class="container">
+    <div class="sec-h"><div class="k">FAQ</div><h2>Questions</h2></div>
+    <div class="faq">
+      <details class="q"><summary>Is this safe to play?</summary><p>Yes. Every email, company, person and domain is fictional. No link or attachment in the emails opens. We only store the name, email and phone number you enter, plus your final score.</p></details>
+      <details class="q"><summary>Why do you ask for my details?</summary><p>So we can send you your result and follow up with cybersecurity training and resources. Your details are never sold or shared. Nothing to install: it runs in your browser on any phone or laptop.</p></details>
+      <details class="q"><summary>Why are some emails real?</summary><p>Because real inboxes are mostly real email. If you report everything, you ignore genuine alerts and slow your team down. Good security is about judging accurately, not panicking.</p></details>
+      <details class="q"><summary>What are SPF, DKIM and DMARC?</summary><p>Checks that confirm whether an email really came from the domain it claims. A fail is a strong warning sign. A pass only proves the sender owns that domain, which an attacker can do with a look-alike domain.</p></details>
+      <details class="q"><summary>I clicked a real phishing link. What now?</summary><p>Change your password immediately from the real website, change it anywhere you reused it, and report it to your IT or security team straight away. Speed matters more than embarrassment.</p></details>
+    </div>
+  </div>
+</section>
+
+<div class="cta-band">
+  <h2>Think you're <span class="grad">phish-proof</span>?</h2>
+  <p class="muted" style="margin-bottom:22px">5 minutes. 10 emails. Prove it.</p>
+  <a class="btn" href="#play" id="bandStart">Take the challenge ▶</a>
+</div>
+
+<footer>
+  <div class="container">
+    <span>© 2026 Spot the Phish · Phishing awareness training</span>
+    <span>All scenarios are fictional and for educational use only.</span>
+  </div>
+</footer>
+
+<div class="bar" id="bar"><div class="in" id="barIn">
+  <button class="big red" data-g="1">🚩 Phishing</button><button class="big green" data-g="0">✓ Legit</button>
+</div></div>
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet">
+  <div class="lbl" id="sheetLbl"></div>
+  <div class="url" id="sheetUrl"></div>
+  <p class="muted" style="font-size:13px;margin:0 0 12px" id="sheetNote"></p>
+  <button class="btn ghost full" id="sheetClose">Got it</button>
+</div>
+
+<script>
+const L = (t,u,cls="",style="") => `<a class="l ${cls}" data-url="${u}" style="${style}">${t}</a>`;
+const BTN = (t,u,c) => L(t,u,"cta",`background:${c}`);
+const EMAILS = [
+{
+  id:1, phish:true, color:"#2563eb",
+  name:"Nimbus IT Helpdesk", email:"it-support@nimbuslabs-helpdesk.com",
+  replyTo:"it-support@nimbuslabs-helpdesk.com", to:"arjun.sharma@nimbuslabs.com",
+  date:"Today, 9:02 AM", subject:"[Action Required] Your password expires in 2 hours",
+  preview:"Your Nimbus SSO password will expire today. Keep your current password…",
+  auth:{spf:"pass",dkim:"pass",dmarc:"pass",by:"nimbuslabs-helpdesk.com"},
+  body:`<div class="logo" style="color:#2563eb">Nimbus Labs · IT</div>
+  <p>Hi Arjun,</p>
+  <p>Our records show your Nimbus SSO password <b>expires in 2 hours</b>. After that you will lose access to email, Slack and VPN until IT can manually reset it (2–3 business days).</p>
+  <p>To keep your current password, confirm it at the employee portal:</p>
+  ${BTN("Keep My Current Password","https://nimbuslabs-sso.login-portal.co/keep-password?u=arjun.sharma","#2563eb")}
+  <p>Or visit ${L("portal.nimbuslabs.com","https://nimbuslabs-sso.login-portal.co/keep-password")}</p>
+  <p class="sig">Thanks,<br>IT Service Desk<br>Nimbus Labs</p>`,
+  flags:["Sender domain is nimbuslabs-helpdesk.com, not nimbuslabs.com","Both links go to login-portal.co, even the one whose text says portal.nimbuslabs.com","2-hour deadline plus a scary 3-day lockout","'Keep your current password' is not a real IT process; you'd just change it in settings","SPF/DKIM pass only proves the attacker owns their own look-alike domain"],
+  why:"The display name and branding look internal, but the email comes from a domain the attacker registered. Authentication passing is the trap here: it only proves the email really came from nimbuslabs-helpdesk.com, not that the domain is yours."
+},
+{
+  id:2, phish:false, color:"#111827",
+  name:"CodeForge", email:"noreply@codeforge.dev",
+  replyTo:"(none)", to:"arjun.sharma@nimbuslabs.com",
+  date:"Today, 8:41 AM", subject:"New sign-in to your CodeForge account",
+  preview:"We noticed a new sign-in to your account from Chrome on macOS…",
+  auth:{spf:"pass",dkim:"pass",dmarc:"pass",by:"codeforge.dev"},
+  body:`<div class="logo">⌘ CodeForge</div>
+  <p>Hi arjun-sharma,</p>
+  <p>We noticed a new sign-in to your CodeForge account.</p>
+  <p style="background:#f3f4f6;border-radius:8px;padding:12px;font-size:13.5px"><b>Browser:</b> Chrome on macOS<br><b>Location:</b> Bengaluru, Karnataka, IN<br><b>Time:</b> Today, 8:39 AM IST</p>
+  <p><b>If this was you</b>, you don't need to do anything.</p>
+  <p>If you don't recognise this sign-in, go to your ${L("security settings","https://codeforge.dev/settings/security")} to review active sessions and change your password.</p>
+  <p class="sig">— The CodeForge Team<br><small>You're receiving this because security alerts are enabled. ${L("Manage notifications","https://codeforge.dev/settings/notifications")}</small></p>`,
+  flags:["Sent from the service's real domain (codeforge.dev) with authentication passing","Links go to codeforge.dev, the same domain","No urgency: 'If this was you, you don't need to do anything'","Doesn't ask for a password, OTP or payment","Details (Bengaluru, Chrome on macOS, 8:39 AM) match what you were actually doing"],
+  why:"This is what a real security notification looks like: informational, no pressure, and it sends you to settings on the real domain. Reporting every alert as phishing trains people to ignore real ones."
+},
+{
+  id:3, phish:true, color:"#7c3aed",
+  name:"Rohan Mehta", email:"rohan.mehta.ceo.nimbus@gmail.com",
+  replyTo:"rohan.mehta.ceo.nimbus@gmail.com", to:"arjun.sharma@nimbuslabs.com",
+  date:"Today, 7:55 AM", subject:"Are you available?",
+  preview:"I need a quick favour. I'm in a client meeting and can't talk…",
+  auth:{spf:"pass",dkim:"pass",dmarc:"pass",by:"gmail.com"},
+  body:`<p>Arjun,</p>
+  <p>Are you available? I need a quick favour. I'm stuck in back-to-back client meetings and can't take calls.</p>
+  <p>I want to surprise a few of the team with gift cards for closing the Q3 deal. Can you buy <b>8 × ₹10,000 shopping gift cards</b> from a nearby store, scratch the codes and email me photos? I'll reimburse you personally by this evening.</p>
+  <p>Please keep it quiet, it's a surprise.</p>
+  <p>Sent from my iPhone<br>Rohan</p>`,
+  flags:["CEO writing from a personal Gmail address","Gift cards are untraceable cash for scammers","'Can't take calls' stops you from verifying","Secrecy request ('keep it quiet')","You pay personally, with 'reimbursement later'"],
+  why:"Classic CEO / gift-card fraud. No executive asks an engineer to buy gift cards from a personal account. Verify by messaging the real CEO through Slack or a known number."
+},
+{
+  id:4, phish:false, color:"#059669",
+  name:"Nimbus People Team", email:"people@nimbuslabs.com",
+  replyTo:"people@nimbuslabs.com", to:"all-india@nimbuslabs.com",
+  date:"Yesterday, 4:30 PM", subject:"Reminder: Health insurance enrolment closes 30 Nov",
+  preview:"A friendly reminder that open enrolment for 2027 health insurance…",
+  auth:{spf:"pass",dkim:"pass",dmarc:"pass",by:"nimbuslabs.com"},
+  body:`<div class="logo" style="color:#059669">Nimbus Labs · People</div>
+  <p>Hi everyone,</p>
+  <p>A friendly reminder that open enrolment for 2027 group health insurance closes on <b>30 November</b>.</p>
+  <p>If you want to add dependants or top up your cover, log in to the HR portal as you normally do and go to <b>Benefits → 2027 Enrolment</b>. If you don't want to change anything, your current plan rolls over automatically.</p>
+  <p>Questions? Drop them in <b>#ask-people</b> on Slack or join the Q&A session on Thursday at 4 PM (it's on the company calendar).</p>
+  <p>More details on the ${L("benefits page","https://intranet.nimbuslabs.com/benefits/2027")}.</p>
+  <p class="sig">Cheers,<br>People Team, Nimbus Labs</p>`,
+  flags:["Sent from the company's real domain (nimbuslabs.com), authentication passing","Sent to a company-wide list, as expected for a benefits announcement","Two weeks of notice, and doing nothing is fine (plan rolls over)","Tells you to use the portal 'as you normally do' rather than a login link","Only link goes to intranet.nimbuslabs.com"],
+  why:"Real internal communication: real domain, reasonable deadline, no credentials requested, and it points you to channels you already use (Slack, company calendar)."
+},
+{
+  id:5, phish:true, color:"#ea580c",
+  name:"Accounts | Brightline Supplies", email:"accounts@brightline-supplies.com",
+  replyTo:"brightline.payments@outlook.com", to:"arjun.sharma@nimbuslabs.com",
+  date:"Yesterday, 2:12 PM", subject:"RE: Overdue Invoice #INV-44821 - Final Notice",
+  preview:"Please find attached the overdue invoice. Kindly process payment today…",
+  auth:{spf:"fail",dkim:"none",dmarc:"fail",by:"mail-relay-77.hostserv.xyz"},
+  body:`<p>Dear Sir/Madam,</p>
+  <p>As per our previous correspondence, Invoice #INV-44821 for ₹3,48,500 is now <b>45 days overdue</b>. Kindly open the attached invoice and process payment today to avoid service suspension and late fees.</p>
+  <p>Please note our <b>bank details have changed</b>, the updated account is in the attached document.</p>
+  <p>Regards,<br>Accounts Receivable<br>Brightline Supplies Pvt. Ltd.</p>`,
+  attach:[{n:"INV-44821_Brightline.html",s:"12 KB",c:"#ea580c",t:"HTML"}],
+  flags:["Subject says 'RE:' but you never had a thread about this","Reply-To goes to an outlook.com address, not the vendor's domain","SPF and DMARC fail: it didn't come from Brightline's servers","Invoice is an .html file (a classic fake-login or malware wrapper)","'Bank details have changed' + overdue pressure = invoice fraud","Sent to an engineer, not finance; generic 'Dear Sir/Madam'"],
+  why:"Invoice fraud stacks fake urgency on top of a changed bank account. The authentication failure and the outlook.com reply-to are the hard evidence; the .html attachment is the payload."
+},
+{
+  id:6, phish:true, color:"#0891b2",
+  name:"Priya Nair via DocuSafe", email:"share-notify@docusafe-mail.net",
+  replyTo:"no-reply@docusafe-mail.net", to:"arjun.sharma@nimbuslabs.com",
+  date:"Yesterday, 11:47 AM", subject:"Priya Nair shared \"Q4 Bonus & Appraisal Ratings.xlsx\" with you",
+  preview:"Priya Nair has shared a document with you. Sign in to view…",
+  auth:{spf:"pass",dkim:"pass",dmarc:"none",by:"docusafe-mail.net"},
+  body:`<div class="logo" style="color:#0891b2">📄 DocuSafe</div>
+  <p><b>Priya Nair</b> (priya.nair@nimbuslabs.com) shared a file with you:</p>
+  <p style="background:#f3f4f6;border-radius:8px;padding:14px"><b>Q4 Bonus & Appraisal Ratings.xlsx</b><br><small>"Arjun, please review before our 1:1, keep confidential"</small></p>
+  ${BTN("Open Document","https://docusafe-mail.net.auth-verify.top/signin?redirect=nimbuslabs","#0891b2")}
+  <p><small>To view this document you'll need to sign in with your work email and password. This link expires in 24 hours.</small></p>`,
+  flags:["The 'Open' link goes to auth-verify.top, not a document service","File name is bait: bonuses and appraisal ratings are irresistible","Asks for your work email and password to view a 'shared' file","24-hour expiry adds pressure","Nimbus doesn't use 'DocuSafe'; a real share would come from your company's own tools"],
+  why:"Fake file-share notifications are one of the most common credential-harvesting tricks. The internal name (Priya) is just text in the email body; anyone can type it. The link destination gives it away."
+},
+{
+  id:7, phish:false, color:"#db2777",
+  name:"Kartly", email:"orders@kartly.in",
+  replyTo:"support@kartly.in", to:"arjun.sharma@nimbuslabs.com",
+  date:"Mon, 6:20 PM", subject:"Your order #KT-829174 has shipped",
+  preview:"Good news! Your order is on its way and should arrive by Thursday…",
+  auth:{spf:"pass",dkim:"pass",dmarc:"pass",by:"kartly.in"},
+  body:`<div class="logo" style="color:#db2777">Kartly</div>
+  <p>Hi Arjun,</p>
+  <p>Good news! Your order <b>#KT-829174</b> has shipped and should arrive by <b>Thursday</b>.</p>
+  <p style="background:#f3f4f6;border-radius:8px;padding:12px;font-size:13.5px">1 × Wireless mouse (black)<br>Paid via UPI · ₹1,299</p>
+  ${BTN("Track your order","https://www.kartly.in/orders/KT-829174/track","#db2777")}
+  <p>Nothing else is needed from you. Payment is already complete.</p>
+  <p class="sig">Team Kartly<br><small>Need help? Visit ${L("kartly.in/help","https://www.kartly.in/help")}</small></p>`,
+  flags:["Sender, reply-to and links are all on kartly.in","Matches a purchase you actually made (you ordered a mouse on Monday)","States payment is complete and nothing else is needed","No request for card details, OTP or a 'redelivery fee'"],
+  why:"Legit order confirmations reference a real purchase, link only to the store's own domain, and never ask you to pay again. Compare this with the fake 'customs fee' parcel scams, which always want money."
+},
+{
+  id:8, phish:true, color:"#1e3a8a",
+  name:"NorthStar Bank", email:"alerts@northstarbank.com",
+  replyTo:"security-desk@northstar-alerts.ru", to:"arjun.sharma@nimbuslabs.com",
+  date:"Mon, 1:05 PM", subject:"Unusual transaction of ₹74,999 on your account",
+  preview:"A transaction of ₹74,999 was attempted on your NorthStar debit card…",
+  auth:{spf:"fail",dkim:"fail",dmarc:"fail",by:"vps-2291.cheaphost.ru"},
+  body:`<div class="logo" style="color:#1e3a8a">NorthStar Bank</div>
+  <p>Dear Customer,</p>
+  <p>A transaction of <b>₹74,999</b> at <b>ELECTRO WORLD ONLINE</b> was attempted on your debit card ending <b>4417</b>.</p>
+  <p>If you did NOT make this transaction, cancel it immediately to prevent the amount being debited:</p>
+  ${BTN("Cancel Transaction","https://northstarbank.com.secure-cancel.ru/txn/cancel","#1e3a8a")}
+  <p><small>You will be asked to verify with your card number, expiry and the OTP sent to your phone.</small></p>
+  <p class="sig">NorthStar Bank Fraud Prevention</p>`,
+  flags:["The From address looks real, but it's spoofed: SPF, DKIM and DMARC all fail","It was sent from a .ru hosting server, not the bank","Reply-To is a different .ru domain","The link's real domain is secure-cancel.ru; 'northstarbank.com' is only a subdomain on the left","Asks for card number, expiry and OTP, which no bank ever asks for by email","Generic 'Dear Customer' + panic amount"],
+  why:"The hardest one. The From line looks perfect because it's forged. That's why you check details: authentication failed and the reply-to and link both go to Russian domains. When in doubt, call the number on the back of your card."
+},
+{
+  id:9, phish:false, color:"#0d9488",
+  name:"Priya Nair", email:"priya.nair@nimbuslabs.com",
+  replyTo:"priya.nair@nimbuslabs.com", to:"arjun.sharma@nimbuslabs.com",
+  date:"Mon, 10:14 AM", subject:"Moving our 1:1 to Wednesday",
+  preview:"Hey Arjun, I've got a clash on Tuesday. Moved our 1:1 to Wed 3 PM…",
+  auth:{spf:"pass",dkim:"pass",dmarc:"pass",by:"nimbuslabs.com"},
+  body:`<p>Hey Arjun,</p>
+  <p>I've got a clash with the planning offsite on Tuesday, so I've moved our 1:1 to <b>Wednesday 3 PM</b>. The updated invite should already be on your calendar.</p>
+  <p>Could you bring a quick update on the API rate-limiting work? No slides needed, just where it's at and any blockers. The ticket's here if you want to add notes: ${L("NIM-2214","https://jira.nimbuslabs.com/browse/NIM-2214")}</p>
+  <p>If Wednesday doesn't work, just ping me on Slack.</p>
+  <p>Thanks!<br>Priya</p>`,
+  flags:["Sent from your manager's real address on nimbuslabs.com, authentication passing","Ordinary request that fits your actual work (a 1:1 and a ticket you own)","Only link goes to the company's own Jira (jira.nimbuslabs.com)","Offers a normal fallback channel (Slack) instead of discouraging verification","No money, credentials, attachments or secrecy"],
+  why:"Normal internal email. Being suspicious is good, but the goal is accuracy. This passes every check: real domain, authentication, internal links and a request that makes sense."
+},
+{
+  id:10, phish:true, color:"#4f46e5",
+  name:"Nimbus Payroll", email:"payroll@nlmbuslabs.com",
+  replyTo:"payroll@nlmbuslabs.com", to:"arjun.sharma@nimbuslabs.com",
+  date:"Sun, 9:48 PM", subject:"Salary credit on hold - update bank details before 25th",
+  preview:"Due to our migration to a new payroll provider, your November salary…",
+  auth:{spf:"pass",dkim:"pass",dmarc:"none",by:"nlmbuslabs.com"},
+  body:`<div class="logo" style="color:#4f46e5">Nimbus Labs · Payroll</div>
+  <p>Dear Employee,</p>
+  <p>Nimbus Labs is migrating to a new payroll provider. To make sure your <b>November salary</b> is credited on time, all employees must re-confirm their bank details before the <b>25th</b>.</p>
+  <p>Employees who don't update their details will have their salary <b>put on hold</b> until the December cycle.</p>
+  ${BTN("Update Bank Details","https://nlmbuslabs.com/payroll/update-details","#4f46e5")}
+  <p><small>You will need: bank account number, IFSC, PAN and your Nimbus SSO login.</small></p>
+  <p class="sig">Payroll Operations<br>Nimbus Labs</p>`,
+  flags:["Domain is nlmbuslabs.com: the 'i' in nimbus is swapped for an 'l'","Sent on a Sunday night to 'Dear Employee'","Threat: salary held for a month if you don't act","Asks for bank account, PAN and your SSO login in one form","A real payroll migration would be announced by HR through internal channels first"],
+  why:"Typosquatting: nlmbuslabs.com vs nimbuslabs.com. Every other detail is built to look internal. Read every character of the domain on anything that touches money or credentials."
+}
+];
+
+const $ = id => document.getElementById(id);
+let idx = 0, answers = [], det = false, playing = false, playVisible = false;
+
+// nav
+$("burger").onclick = ()=>$("mobmenu").classList.toggle("open");
+document.querySelectorAll("#mobmenu a").forEach(a=>a.addEventListener("click",()=>$("mobmenu").classList.remove("open")));
+
+function view(id){ ["start","game","result"].forEach(s=>$(s).classList.toggle("hidden",s!==id)); }
+function scrollToPlay(){ $("play").scrollIntoView({behavior:"smooth"}); }
+function authCls(v){ return v==="pass"?"pass":v==="fail"?"fail":"neutral"; }
+function markDomain(u){
+  try{ const url=new URL(u), host=url.hostname, reg=host.split(".").slice(-2).join(".");
+    return `${url.protocol}//${host.slice(0,host.length-reg.length)}<mark>${reg}</mark>${url.pathname}${url.search}`; }
+  catch(e){ return u; }
+}
+function openSheet(label, html, note){ $("sheetLbl").textContent=label; $("sheetUrl").innerHTML=html; $("sheetNote").textContent=note; $("sheet").classList.add("on"); $("scrim").classList.add("on"); }
+function closeSheet(){ $("sheet").classList.remove("on"); $("scrim").classList.remove("on"); }
+$("sheetClose").onclick = closeSheet; $("scrim").onclick = closeSheet;
+
+// mobile decision bar: only while an email is awaiting a decision and the game is on screen
+function updateBar(){ $("bar").classList.toggle("on", playing && playVisible && !answers[idx]); }
+new IntersectionObserver(es=>{ playVisible = es[0].isIntersecting; updateBar(); }, {threshold:0.05}).observe($("play"));
+document.querySelectorAll("#barIn .big").forEach(b=>b.onclick=()=>decide(b.dataset.g==="1"));
+
+function renderEmail(){
+  const e = EMAILS[idx], a = answers[idx];
+  det = !!a;
+  $("gtop").classList.remove("hidden"); $("prog").classList.remove("hidden");
+  $("progBar").style.width = ((idx+(a?1:0))/EMAILS.length*100)+"%";
+  $("pill").textContent = `Email ${idx+1} of ${EMAILS.length}`;
+  $("scorePill").textContent = `Score ${answers.filter(x=>x&&x.correct).length}`;
+  const initials = e.name.split(/\s+/).map(w=>w[0]).join("").slice(0,2).toUpperCase();
+  const att = (e.attach||[]).map(x=>`<div class="att" data-att="${x.n}"><div class="ic" style="background:${x.c}">${x.t}</div><div><b>${x.n}</b><div class="muted" style="font-size:12px">${x.s}</div></div></div>`).join("");
+  $("mail").innerHTML = `<div class="mailcard">
+    <div class="mhead">
+      <div class="subj">${e.subject}</div>
+      <div class="sender">
+        <div class="avatar" style="background:${e.color}">${initials}</div>
+        <div class="who"><b>${e.name}</b><span class="addr">${e.email}</span>
+          <span class="muted" style="font-size:12.5px">to ${e.to==="arjun.sharma@nimbuslabs.com"?"me":e.to} · ${e.date}</span><br>
+          <button class="toggle" id="detBtn">${det?"Hide sender details ▲":"🔍 Sender details ▼"}</button></div>
+      </div>
+      <div class="details ${det?"":"hidden"}" id="det">
+        <span>from:</span><span>${e.email}</span><span>reply-to:</span><span>${e.replyTo}</span><span>sent by:</span><span>${e.auth.by}</span>
+        <span>SPF:</span><span class="${authCls(e.auth.spf)}">${e.auth.spf.toUpperCase()}</span>
+        <span>DKIM:</span><span class="${authCls(e.auth.dkim)}">${e.auth.dkim.toUpperCase()}</span>
+        <span>DMARC:</span><span class="${authCls(e.auth.dmarc)}">${e.auth.dmarc.toUpperCase()}</span>
+      </div>
+    </div>
+    <div class="body">${e.body}</div>
+    ${att?`<div class="attach">${att}</div>`:""}
+  </div>
+  ${a?"":`<div class="decide desk"><button class="big red" id="pBtn">🚩 Phishing</button><button class="big green" id="lBtn">✓ Legit</button></div><p class="hint">Investigate first, then decide.</p>`}`;
+  $("detBtn").onclick = ()=>{ det=!det; $("det").classList.toggle("hidden",!det); $("detBtn").textContent = det?"Hide sender details ▲":"🔍 Sender details ▼"; };
+  if(!a){ $("pBtn").onclick=()=>decide(true); $("lBtn").onclick=()=>decide(false); }
+  document.querySelectorAll("#mail a.l").forEach(el=>el.onclick=ev=>{ ev.preventDefault(); openSheet("This link really goes to", markDomain(el.dataset.url), "The highlighted part is the real website. Links are disabled in this challenge."); });
+  document.querySelectorAll("#mail .att").forEach(el=>el.onclick=()=>openSheet("Attachment", el.dataset.att, "Attachments are disabled. Ask yourself: does this file type make sense?"));
+  $("verdictBox").innerHTML = a ? verdictHTML() : "";
+  if(a) wireNext();
+  updateBar();
+}
+
+function decide(guess){
+  if(answers[idx]) return;
+  answers[idx] = {guess, correct: guess===EMAILS[idx].phish};
+  renderEmail();
+  setTimeout(()=>$("verdictBox").scrollIntoView({behavior:"smooth",block:"start"}),60);
+}
+
+function verdictHTML(){
+  const e=EMAILS[idx], a=answers[idx], last = idx===EMAILS.length-1;
+  return `<div class="verdict ${a.correct?"ok":"no"}">
+    <h4>${a.correct?"✓ Correct!":"✗ Not quite"} This email is ${e.phish?"PHISHING":"LEGIT"}</h4>
+    <p style="margin:0">${e.why}</p>
+    <div class="lbl">${e.phish?"🚩 Red flags":"✓ Why it checks out"}</div>
+    <ul>${e.flags.map(f=>`<li>${f}</li>`).join("")}</ul>
+    <button class="btn full" id="nBtn">${last?"See my score →":"Next email →"}</button></div>`;
+}
+function wireNext(){
+  $("nBtn").onclick = ()=>{ if(idx===EMAILS.length-1) finish(); else { idx++; renderEmail(); scrollToPlay(); } };
+}
+
+function finish(){
+  playing = false; updateBar();
+  const score = answers.filter(a=>a.correct).length;
+  const pT = EMAILS.filter(e=>e.phish).length, lT = EMAILS.length-pT;
+  const missed = EMAILS.filter((e,i)=>e.phish && !answers[i].guess).length;
+  const fa = EMAILS.filter((e,i)=>!e.phish && answers[i].guess).length;
+  $("score").textContent = `${score}/10`;
+  let h,p;
+  if(score===10){h="Phish-proof 🛡️";p="Perfect. You caught every attack and didn't panic on the real emails.";}
+  else if(score>=8){h="Strong defender";p="You'd stop most attacks. The ones you missed below are exactly how an attacker would get you.";}
+  else if(score>=5){h="At risk";p="You'd catch the obvious ones, but a targeted attack would probably get through.";}
+  else{h="High risk";p="An attacker would have a good chance with you right now. Read the red flags below and play again.";}
+  if(player) h = `${player.name.split(" ")[0]}, ${h.charAt(0).toLowerCase()+h.slice(1)}`;
+  $("verdictH").textContent=h; $("verdictP").textContent=p;
+  sendResults(score, missed, fa);
+  $("missed").textContent=`${missed}/${pT}`; $("fa").textContent=`${fa}/${lT}`;
+  $("review").innerHTML = EMAILS.map((e,i)=>`<div class="rrow"><span class="dot" style="background:${answers[i].correct?"var(--good)":"var(--bad)"}"></span><div><b>${i+1}. ${e.name}</b> <span class="muted">· ${e.phish?"Phishing":"Legit"}</span><div class="muted" style="font-size:12.5px">${e.subject}</div></div></div>`).join("");
+  $("gtop").classList.add("hidden"); $("prog").classList.add("hidden");
+  view("result"); scrollToPlay();
+}
+
+// ---- lead capture: POST to /api/submit (Vercel function -> Google Sheet) ----
+let player = null;
+try{ const s = sessionStorage.getItem("stp_player"); if(s) player = JSON.parse(s); }catch(e){}
+
+function postForm(type, data){
+  const payload = {type, ...data, website: ($("fBot")||{}).value || ""};
+  return fetch("/api/submit", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(payload), keepalive:true}).catch(()=>{});
+}
+
+function setErr(inputId, errId, msg){ $(errId).textContent = msg; if(inputId) $(inputId).classList.toggle("bad", !!msg); return !msg; }
+
+$("leadForm").addEventListener("submit", ev=>{
+  ev.preventDefault();
+  const name = $("fName").value.trim();
+  const email = $("fEmail").value.trim();
+  const phoneRaw = $("fPhone").value.trim();
+  const digits = phoneRaw.replace(/\D/g,"");
+  let ok = true;
+  ok = setErr("fName","eName", name.length < 2 ? "Please enter your name." : "") && ok;
+  ok = setErr("fEmail","eEmail", /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) ? "" : "Please enter a valid email.") && ok;
+  ok = setErr("fPhone","ePhone", (digits.length >= 10 && digits.length <= 15) ? "" : "Please enter a valid phone number (at least 10 digits).") && ok;
+  ok = setErr(null,"eConsent", $("fConsent").checked ? "" : "Please tick the box to continue.") && ok;
+  if(!ok) return;
+  player = {name, email, phone: phoneRaw};
+  try{ sessionStorage.setItem("stp_player", JSON.stringify(player)); }catch(e){}
+  $("startBtn").disabled = true; $("startBtn").textContent = "Opening inbox…";
+  // don't make players wait on the network: start after the request or 1.5s, whichever is first
+  Promise.race([postForm("players", {...player, consent:"yes"}), new Promise(r=>setTimeout(r,1500))]).then(()=>{
+    $("startBtn").disabled = false; $("startBtn").textContent = "Open my inbox ▶";
+    start();
+  });
+});
+
+function sendResults(score, missed, fa){
+  if(!player) return;
+  const summary = EMAILS.map((e,i)=>`${i+1}:${answers[i].correct?"✓":"✗"}`).join(" ");
+  postForm("results", {...player, score:`${score}/10`, phishing_missed:String(missed), legit_reported:String(fa), answers:summary});
+}
+
+function start(){ idx=0; answers=[]; playing=true; view("game"); renderEmail(); scrollToPlay(); }
+$("retryBtn").onclick = start;
+["heroStart","bandStart"].forEach(id=>$(id).addEventListener("click",ev=>{
+  ev.preventDefault();
+  if(playing || !$("result").classList.contains("hidden")) { scrollToPlay(); return; }
+  if(player) start(); else { scrollToPlay(); setTimeout(()=>$("fName").focus({preventScroll:true}), 600); }
+}));
+if(player){ $("fName").value = player.name; $("fEmail").value = player.email; $("fPhone").value = player.phone; }
+$("copyBtn").onclick = async ()=>{
+  const t = `I scored ${$("score").textContent} on Spot the Phish 🎣 ${location.href.split("#")[0]}`;
+  try{ await navigator.clipboard.writeText(t); $("copyBtn").textContent="Copied ✓"; }catch(e){ $("copyBtn").textContent=t; }
+  setTimeout(()=>$("copyBtn").textContent="Copy my score",2500);
+};
+</script>
+</body>
+</html>
