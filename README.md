@@ -58,13 +58,14 @@ Supabase → **Table Editor**:
   so they can find themselves on the leaderboard without anyone else knowing who they are.
 - Toggle **🎭 Codenames / 👥 Aggregate only** at the top. Aggregate only removes the leaderboard
   and recent list entirely.
-  It also shows a big headline for the room: **"X% of this room would have been breached"** plus the
-  phishing email that fooled the most people, with its red flags. Ideal for the screen-share debrief. Link straight to it with `/dashboard?names=hidden`.
+ Link straight to it with `/dashboard?names=hidden`.
 - Already ran the schema before codenames existed? Run once in the SQL Editor:
   `alter table public.results add column if not exists codename text;`
   (Until then, results still save and the leaderboard shows "Player #123".)
 
 ## Live dashboard
+The top of the dashboard always shows **"X% of this room would have been breached"** plus the phishing
+email that fooled the most people, with its red flags. Ideal for the screen-share debrief.
 `https://YOUR-SITE/dashboard?key=YOUR_DASHBOARD_KEY`. The key is removed from the address bar after
 loading, so it won't show in screen shares. Refreshes every 10s. Filter: Last hour / Today / All time.
 

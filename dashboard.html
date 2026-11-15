@@ -336,10 +336,11 @@ function render(d){
   drawFooled(d.perEmail);
   const hidden = !!d.namesHidden;
   $("lbCard").classList.toggle("hidden", hidden); $("aggCard").classList.toggle("hidden", !hidden);
-  $("room").classList.toggle("hidden", !hidden);
-  $("kBreachTile").classList.toggle("hidden", hidden);
-  document.querySelector(".kpis").classList.toggle("three", hidden);
-  if(hidden) renderRoom(d);
+  // "This room" headline is always shown at the top, in both modes
+  $("room").classList.remove("hidden");
+  $("kBreachTile").classList.add("hidden");
+  document.querySelector(".kpis").classList.add("three");
+  renderRoom(d);
   const tp = d.topScores || {perfect:d.distribution[10], ninePlus:d.distribution[9]+d.distribution[10]};
   $("aPerfect").textContent = tp.perfect; $("a9").textContent = tp.ninePlus;
   $("aTop").textContent = d.completed ? pct((d.distribution[8]+d.distribution[9]+d.distribution[10])/d.completed) : "0%";
