@@ -5,7 +5,9 @@ A phone-first phishing awareness challenge for webinars. Players enter their nam
 ```
 index.html                  website + game
 qr.html                     presenter page: QR code for the site + "Download PNG"
+dashboard.html              live cumulative results for the presenter (/dashboard)
 api/submit.js               Vercel serverless function -> Google Sheet
+api/stats.js                aggregates scores for the dashboard (no emails/phones)
 google-apps-script/Code.gs  paste into Google Apps Script (the Sheet receiver)
 ```
 
@@ -26,6 +28,7 @@ No build step, no dependencies.
 3. **Settings → Environment Variables**, add:
    - `SHEET_WEBHOOK_URL` = the Web app URL from step 1
    - `SHEET_SECRET` = the same string you put in `SECRET`
+   - `DASHBOARD_KEY` = a password for the live dashboard (optional but recommended)
 4. **Deployments → ⋯ → Redeploy** (env vars only apply to new deployments).
 
 ### 3. Test before the webinar
@@ -36,6 +39,18 @@ No build step, no dependencies.
 ### 4. QR code
 Open `https://YOUR-SITE/qr.html` → **Download PNG** → put it on your slide.
 Also paste the link in the webinar chat. People watching on their phone can't scan their own screen.
+
+## Live dashboard
+Open `https://YOUR-SITE/dashboard?key=YOUR_DASHBOARD_KEY` (the key is removed from the
+address bar after loading, so it won't show in screen shares).
+
+Shows: players joined, finished, average score, % who fell for at least one phishing email,
+score distribution, risk levels, which emails fooled the audience, leaderboard and recent finishers.
+Refreshes every 10 seconds. Filter: Last hour / Today / All time. Names appear as first name + initial;
+emails and phone numbers are never sent to the dashboard.
+
+**If you set up the Google Sheet before the dashboard existed:** paste the new `Code.gs`, then
+**Deploy → Manage deployments → ✏️ Edit → Version: New version → Deploy**. The URL stays the same.
 
 ## Set your call-to-action (scorecard)
 At the end, players see a scorecard with a CTA button. Edit the `CONFIG` block near the

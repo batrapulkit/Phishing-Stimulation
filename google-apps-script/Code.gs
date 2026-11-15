@@ -51,8 +51,32 @@ function doPost(e) {
   }
 }
 
-function doGet() {
-  return json({ ok: true, message: 'Spot the Phish sheet receiver is running.' });
+// Used by the dashboard (via /api/stats). Returns scores only: never emails or phone numbers.
+function doGet(e) {
+  const p = (e && e.parameter) || {};
+  if (p.action !== 'rows') return json({ ok: true, message: 'Spot the Phish sheet receiver is running.' });
+  if (p.secret !== SECRET) return json({ ok: false, error: 'unauthorized' });
+
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const read = (name) => {
+    const sh = ss.getSheetByName(name);
+    if (!sh || sh.getLastRow() < 2) return [];
+    const values = sh.getRange(1, 1, sh.getLastRow(), sh.getLastColumn()).getValues();
+    const head = values.shift();
+    return values.map(r => Object.fromEntries(head.map((h, i) => [h, r[i]])));
+  };
+  const toIso = (v) => (v instanceof Date ? v.toISOString() : String(v || ''));
+
+  const players = read('players').map(r => ({ t: toIso(r.timestamp) }));
+  const results = read('results').map(r => ({
+    t: toIso(r.timestamp),
+    name: String(r.name || ''),
+    score: String(r.score || ''),
+    missed: Number(r.phishing_missed) || 0,
+    fa: Number(r.legit_reported) || 0,
+    answers: String(r.answers || ''),
+  }));
+  return json({ ok: true, players: players, results: results });
 }
 
 function json(obj) {
