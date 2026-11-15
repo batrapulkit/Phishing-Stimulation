@@ -1,17 +1,25 @@
 // Minimal Supabase REST helper (no npm dependencies needed).
 // Env vars (Vercel > Settings > Environment Variables):
-//   SUPABASE_URL               e.g. https://abcdxyz.supabase.co
-//   SUPABASE_SERVICE_ROLE_KEY  Supabase > Project Settings > API Keys > service_role (secret!)
+//   SUPABASE_URL         e.g. https://abcdxyz.supabase.co   (NEXT_PUBLIC_SUPABASE_URL also works)
+//   SUPABASE_SECRET_KEY  Supabase > Project Settings > API Keys > Secret key "sb_secret_..."
+//                        (or the legacy service_role JWT in SUPABASE_SERVICE_ROLE_KEY)
+// The publishable key is NOT enough: tables have RLS on, so only a secret key can read/write.
 
 function config() {
-  const url = (process.env.SUPABASE_URL || "").replace(/\/+$/, "");
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-  if (!url || !key) throw new Error("SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is not set on Vercel");
+  const url = (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "").replace(/\/+$/, "");
+  const key = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+  if (!url) throw new Error("SUPABASE_URL is not set on Vercel");
+  if (!key) throw new Error("SUPABASE_SECRET_KEY is not set on Vercel");
+  if (key.startsWith("sb_publishable_")) throw new Error("SUPABASE_SECRET_KEY is set to the publishable key. Use the sb_secret_ key instead");
   return { url, key };
 }
 
 function headers(key, extra = {}) {
-  return { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json", ...extra };
+  const h = { apikey: key, "Content-Type": "application/json", ...extra };
+  // Legacy service_role keys are JWTs and go in Authorization too.
+  // New sb_secret_ keys are not JWTs: send them only as apikey.
+  if (key.startsWith("eyJ")) h.Authorization = `Bearer ${key}`;
+  return h;
 }
 
 async function insert(table, row) {

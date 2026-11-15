@@ -21,16 +21,17 @@ No build step, no dependencies.
 1. supabase.com → **New project** (any name, e.g. `spot-the-phish`; region: Mumbai for India). Save the DB password somewhere.
 2. Left menu **SQL Editor → New query** → paste all of `supabase/schema.sql` → **Run**.
    You should now see tables `players` and `results` in **Table Editor**.
-3. **Project Settings → API Keys** (or **Data API**). Copy:
+3. **Project Settings → API Keys**. Copy:
    - **Project URL** → e.g. `https://abcdxyz.supabase.co`
-   - **service_role** secret key (click Reveal). ⚠️ Keep this secret: never put it in the HTML.
+   - **Secret key** (`sb_secret_...`, click Reveal). ⚠️ Keep this secret: never put it in the HTML or GitHub.
+   - The **publishable** key (`sb_publishable_...`) is NOT used: RLS blocks it by design.
 
 ### 2. Vercel
 1. vercel.com → **Add New → Project** → import this repo. Framework preset: **Other**. Deploy.
    Tip: set the project name to `spot-the-phish` so your link doesn't say "stimulation".
 2. **Settings → Environment Variables**, add:
-   - `SUPABASE_URL` = the Project URL
-   - `SUPABASE_SERVICE_ROLE_KEY` = the service_role key
+   - `SUPABASE_URL` = the Project URL (`NEXT_PUBLIC_SUPABASE_URL` also works)
+   - `SUPABASE_SECRET_KEY` = the `sb_secret_...` key (a legacy `service_role` key in `SUPABASE_SERVICE_ROLE_KEY` also works)
    - `DASHBOARD_KEY` = any password for the live dashboard
 3. **Deployments → ⋯ → Redeploy** (variables only apply to new deployments).
 
@@ -48,7 +49,7 @@ Supabase → **Table Editor**:
 
 ## Security
 - Row Level Security is **on** with no public policies, so the public/anon key can't read anything.
-- Only the Vercel functions use the service_role key, server-side.
+- Only the Vercel functions use the secret key, server-side.
 - The dashboard only receives scores and "First L." names, never emails or phone numbers.
 
 ## Live dashboard
