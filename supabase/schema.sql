@@ -23,8 +23,12 @@ create table if not exists public.results (
   phishing_missed  smallint not null default 0 check (phishing_missed between 0 and 6),
   legit_reported   smallint not null default 0 check (legit_reported between 0 and 4),
   answers          text,      -- e.g. "1:✓ 2:✗ 3:✓ ..."
+  codename         text,      -- random public alias shown on the dashboard, e.g. "Swift Falcon 27"
   user_agent       text
 );
+
+-- For databases created before codenames existed
+alter table public.results add column if not exists codename text;
 
 create index if not exists players_created_at_idx on public.players (created_at);
 create index if not exists results_created_at_idx on public.results (created_at);

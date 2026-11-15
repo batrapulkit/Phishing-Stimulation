@@ -50,7 +50,17 @@ Supabase → **Table Editor**:
 ## Security
 - Row Level Security is **on** with no public policies, so the public/anon key can't read anything.
 - Only the Vercel functions use the secret key, server-side.
-- The dashboard only receives scores and "First L." names, never emails or phone numbers.
+- The dashboard only receives scores and random codenames: never real names, emails or phone numbers.
+
+## Privacy on the live dashboard
+- Real names, emails and phone numbers are **never sent** to the dashboard (the API doesn't even read them).
+- Each player gets a random **codename** (e.g. "Swift Falcon 27"), shown on their own scorecard,
+  so they can find themselves on the leaderboard without anyone else knowing who they are.
+- Toggle **🎭 Codenames / 👥 Aggregate only** at the top. Aggregate only removes the leaderboard
+  and recent list entirely. Link straight to it with `/dashboard?names=hidden`.
+- Already ran the schema before codenames existed? Run once in the SQL Editor:
+  `alter table public.results add column if not exists codename text;`
+  (Until then, results still save and the leaderboard shows "Player #123".)
 
 ## Live dashboard
 `https://YOUR-SITE/dashboard?key=YOUR_DASHBOARD_KEY`. The key is removed from the address bar after

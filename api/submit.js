@@ -52,11 +52,18 @@ module.exports = async (req, res) => {
       phishing_missed: int(body.phishing_missed, 0, 6) ?? 0,
       legit_reported: int(body.legit_reported, 0, 4) ?? 0,
       answers: orNull(clean(body.answers, 120)),
+      codename: /^[A-Za-z]+ [A-Za-z]+ \d{1,3}$/.test(clean(body.codename, 40)) ? clean(body.codename, 40) : null,
     };
   }
 
   try {
-    await insert(table, row);
+    try {
+      await insert(table, row);
+    } catch (err) {
+      // If the codename column hasn't been added yet, still save the result without it
+      if (row.codename !== undefined && /codename/i.test(err.message)) { delete row.codename; await insert(table, row); }
+      else throw err;
+    }
     return res.status(200).json({ ok: true });
   } catch (err) {
     console.error(err.message);

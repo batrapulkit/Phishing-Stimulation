@@ -241,6 +241,9 @@ body.locked{overflow:hidden}
 .sc::after{content:"";position:absolute;inset:auto -60px -80px auto;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(79,140,255,.18),transparent 70%)}
 .sc-k{font:600 12px 'JetBrains Mono',monospace;letter-spacing:.16em;color:var(--accent)}
 .sc-name{font-size:14px;color:var(--muted);margin-top:4px}
+.sc-code{display:inline-block;margin-top:10px;font-size:13.5px;color:var(--text2);background:rgba(79,140,255,.1);border:1px solid rgba(79,140,255,.3);padding:6px 12px;border-radius:999px}
+.sc-code b{color:#fff}
+.sc-code span{color:var(--muted);font-size:12.5px}
 .sc-hero{display:flex;align-items:center;gap:22px;margin:20px 0 22px}
 .ring{position:relative;width:150px;height:150px;flex:none}
 .ring svg{transform:rotate(-90deg)}
@@ -440,7 +443,7 @@ footer .container{display:flex;justify-content:space-between;gap:16px;flex-wrap:
   <div class="container">
     <div class="sec-h"><div class="k">FAQ</div><h2>Questions</h2></div>
     <div class="faq">
-      <details class="q"><summary>Is this safe to play?</summary><p>Yes. Every email, company, person and domain is fictional. No link or attachment in the emails opens. Your name, email and phone are optional. We store only what you choose to enter, plus your score.</p></details>
+      <details class="q"><summary>Is this safe to play?</summary><p>Yes. Every email, company, person and domain is fictional. No link or attachment in the emails opens. Your name, email and phone are optional. We store only what you choose to enter, plus your score. The live results screen never shows real names: you appear under a random codename.</p></details>
       <details class="q"><summary>Why do you ask for my details?</summary><p>So we can send you your result and follow up with cybersecurity training and resources. Your details are never sold or shared. Nothing to install: it runs in your browser on any phone or laptop.</p></details>
       <details class="q"><summary>Why are some emails real?</summary><p>Because real inboxes are mostly real email. If you report everything, you ignore genuine alerts and slow your team down. Good security is about judging accurately, not panicking.</p></details>
       <details class="q"><summary>What are SPF, DKIM and DMARC?</summary><p>Checks that confirm whether an email really came from the domain it claims. A fail is a strong warning sign. A pass only proves the sender owns that domain, which an attacker can do with a look-alike domain.</p></details>
@@ -827,6 +830,7 @@ function finish(){
     <div class="sc">
       <div class="sc-k">PHISHING SCORECARD</div>
       <div class="sc-name">${who} · ${date}</div>
+      <div class="sc-code">On the live leaderboard you're <b>${esc(getCodename())}</b> <span>(your real name is never shown)</span></div>
       <div class="sc-hero">
         <div class="ring">
           <svg width="150" height="150" viewBox="0 0 150 150"><circle cx="75" cy="75" r="64" stroke="#26314a" stroke-width="12" fill="none"/>
@@ -937,10 +941,22 @@ $("leadForm").addEventListener("submit", ev=>{
 function syncConsent(){ const show = !!($("fEmail").value.trim() || $("fPhone").value.trim()); $("consentRow").classList.toggle("hidden", !show); if(!show) $("eConsent").textContent = ""; }
 ["fEmail","fPhone"].forEach(id=>$(id).addEventListener("input", syncConsent));
 
+// Random public alias for the live dashboard, so real names are never shown on screen.
+function getCodename(){
+  if(player && player.codename) return player.codename;
+  const A = ["Swift","Silent","Sharp","Clever","Brave","Calm","Bold","Quick","Steady","Keen","Witty","Lucky","Mighty","Nimble","Cosmic","Iron"];
+  const N = ["Falcon","Tiger","Otter","Panda","Wolf","Hawk","Lynx","Fox","Eagle","Koala","Badger","Cobra","Raven","Bison","Gecko","Orca"];
+  const r = n => Math.floor(Math.random()*n);
+  const c = `${A[r(A.length)]} ${N[r(N.length)]} ${10 + r(90)}`;
+  if(player){ player.codename = c; try{ sessionStorage.setItem("stp_player", JSON.stringify(player)); }catch(e){} }
+  return c;
+}
+
 function sendResults(score, missed, fa){
   if(!player) return;
   const summary = EMAILS.map((e,i)=>`${i+1}:${answers[i].correct?"✓":"✗"}`).join(" ");
-  postForm("results", {...player, score:`${score}/10`, phishing_missed:String(missed), legit_reported:String(fa), answers:summary});
+  const {codename, ...details} = player;
+  postForm("results", {...details, codename: getCodename(), score:`${score}/10`, phishing_missed:String(missed), legit_reported:String(fa), answers:summary});
 }
 
 function start(){ idx=0; answers=[]; playing=true; finished=false; updateReady(); openApp(); }

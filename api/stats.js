@@ -1,23 +1,23 @@
 // Vercel serverless function: cumulative stats for /dashboard.
 // Reads scores from Supabase and returns aggregates only.
-// Emails and phone numbers are never selected, so they never leave the database.
+// Real names, emails and phone numbers are never selected, so they never leave the database.
+// Individual rows are shown only under random codenames (e.g. "Swift Falcon 27").
 //
 // Env vars:
 //   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY  (see api/_supabase.js)
 //   DASHBOARD_KEY  - optional. If set, the dashboard must be opened with ?key=<value>
 //
 // Query: ?since=<ISO date>  only count entries at/after this time (e.g. this webinar)
+//        ?names=hidden      aggregate only: no leaderboard or recent list at all
 
 const { selectAll, count } = require("./_supabase");
 
 const N_EMAILS = 10;
 
-function displayName(full) {
-  const parts = String(full || "").trim().split(/\s+/).filter(Boolean);
-  if (!parts.length) return "Anonymous";
-  const first = parts[0].slice(0, 18);
-  const last = parts.length > 1 ? " " + parts[parts.length - 1][0].toUpperCase() + "." : "";
-  return first.charAt(0).toUpperCase() + first.slice(1) + last;
+// Only the random codename the game generated is ever shown; real names are never read.
+function displayName(codename, id) {
+  const c = String(codename || "").trim();
+  return /^[A-Za-z]+ [A-Za-z]+ \d{1,3}$/.test(c) ? c : `Player #${id ?? "?"}`;
 }
 
 function tierOf(s) {
@@ -54,7 +54,7 @@ function aggregate(players, results) {
   const totalMissed = results.reduce((a, r) => a + (Number(r.missed) || 0), 0);
   const totalFa = results.reduce((a, r) => a + (Number(r.fa) || 0), 0);
 
-  const withScore = results.map((r, i) => ({ name: displayName(r.name), score: scores[i], t: r.t }));
+  const withScore = results.map((r, i) => ({ name: displayName(r.codename, r.id), score: scores[i], t: r.t }));
   const leaderboard = [...withScore]
     .sort((a, b) => b.score - a.score || new Date(a.t) - new Date(b.t))
     .slice(0, 10);
@@ -85,13 +85,20 @@ module.exports = async (req, res) => {
   try {
     const since = req.query.since ? new Date(req.query.since) : null;
     const filter = since && !isNaN(since) ? `created_at=gte.${encodeURIComponent(since.toISOString())}` : "";
+    const hideNames = req.query.names === "hidden";
+    const cols = "id,created_at,score,phishing_missed,legit_reported,answers";
+    const q = (c) => `select=${c}&order=created_at.asc${filter ? "&" + filter : ""}`;
     const [signups, rows] = await Promise.all([
       count("players", filter),
-      selectAll("results", `select=created_at,name,score,phishing_missed,legit_reported,answers&order=created_at.asc${filter ? "&" + filter : ""}`),
+      // Fall back gracefully if the codename column hasn't been added yet
+      selectAll("results", q(cols + ",codename")).catch(() => selectAll("results", q(cols))),
     ]);
-    const results = rows.map(r => ({ t: r.created_at, name: r.name || "", score: `${r.score}/10`, missed: r.phishing_missed, fa: r.legit_reported, answers: r.answers || "" }));
+    const results = rows.map(r => ({ id: r.id, t: r.created_at, codename: r.codename || "", score: `${r.score}/10`, missed: r.phishing_missed, fa: r.legit_reported, answers: r.answers || "" }));
     const players = Array.from({ length: signups });
-    return res.status(200).json({ ok: true, updatedAt: new Date().toISOString(), ...aggregate(players, results) });
+    const stats = aggregate(players, results);
+    if (hideNames) { stats.leaderboard = []; stats.recent = []; }
+    stats.topScores = { perfect: stats.distribution[10], ninePlus: stats.distribution[9] + stats.distribution[10] };
+    return res.status(200).json({ ok: true, updatedAt: new Date().toISOString(), namesHidden: hideNames, ...stats });
   } catch (err) {
     console.error("stats failed:", err.message);
     return res.status(502).json({ ok: false, error: /not set/.test(err.message) ? err.message : "Could not read from Supabase. Check the Vercel logs." });

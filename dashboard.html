@@ -66,6 +66,11 @@ td.r,th.r{text-align:right}
 td.rank{font:600 13px var(--mono);color:var(--muted);width:30px}
 td.sc{font:700 14px var(--mono)}
 .medal{font-size:15px}
+.agg{display:grid;gap:10px}
+.agg div{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;align-items:baseline;gap:12px}
+.agg b{font:800 30px Inter;letter-spacing:-.02em;min-width:56px}
+.agg span{color:var(--text2);font-size:14px}
+.privacy{font-size:13px;color:var(--muted);margin:14px 0 0}
 .feed{display:grid;gap:6px;margin-top:6px}
 .feed div{display:flex;justify-content:space-between;font-size:13.5px;color:var(--text2);padding:6px 0;border-bottom:1px solid var(--grid)}
 .feed b{font:600 13px var(--mono);color:var(--text)}
@@ -95,6 +100,10 @@ td.sc{font:700 14px var(--mono)}
       <button data-r="hour">Last hour</button>
       <button data-r="today" class="on">Today</button>
       <button data-r="all">All time</button>
+    </div>
+    <div class="seg" id="namesSeg" title="What the leaderboard shows">
+      <button data-n="codenames" class="on">🎭 Codenames</button>
+      <button data-n="hidden">👥 Aggregate only</button>
     </div>
     <div class="live"><span class="dot" id="dot"></span><span id="upd">Connecting…</span></div>
   </header>
@@ -136,15 +145,21 @@ td.sc{font:700 14px var(--mono)}
         <div class="legend"><span><i style="background:var(--series-2)"></i>Phishing email (they clicked "Legit")</span><span><i style="background:var(--series-1)"></i>Real email (they reported it as phishing)</span></div>
         <div id="fooled"></div>
       </div>
-      <div class="card">
+      <div class="card" id="lbCard">
         <h2>Leaderboard</h2>
-        <div class="sub">Top scores · ties go to whoever finished first</div>
-        <table><thead><tr><th>#</th><th>Player</th><th class="r">Score</th></tr></thead><tbody id="lb"></tbody></table>
+        <div class="sub">Top scores, shown by random codename · ties go to whoever finished first</div>
+        <table><thead><tr><th>#</th><th>Codename</th><th class="r">Score</th></tr></thead><tbody id="lb"></tbody></table>
         <h2 style="margin-top:20px">Just finished</h2>
         <div class="feed" id="feed"></div>
       </div>
+      <div class="card hidden" id="aggCard">
+        <h2>Top performers</h2>
+        <div class="sub">Aggregate only · no individual results shown</div>
+        <div class="agg"><div><b id="aPerfect">0</b><span>perfect scores (10/10)</span></div><div><b id="a9">0</b><span>scored 9 or more</span></div><div><b id="aTop">0%</b><span>of finishers scored 8+</span></div></div>
+        <p class="privacy">🔒 Individual names and scores are hidden. Switch to "Codenames" to show the leaderboard with random aliases.</p>
+      </div>
     </section>
-    <div class="foot">Refreshes every 10 seconds · Names shown as first name + initial · No emails or phone numbers are shown here</div>
+    <div class="foot">Refreshes every 10 seconds · Real names, emails and phone numbers are never shown here: players appear only as random codenames</div>
   </main>
 </div>
 <div class="tip" id="tip"></div>
@@ -179,6 +194,15 @@ try{ if(key) sessionStorage.setItem("stp_key", key); else key = sessionStorage.g
 if(qs.get("key")) history.replaceState(null, "", location.pathname); // keep the key out of screenshots
 $("keyGo").onclick = ()=>{ key = $("keyIn").value.trim(); try{ sessionStorage.setItem("stp_key", key); }catch(e){} load(); };
 $("keyIn").addEventListener("keydown", e=>{ if(e.key==="Enter") $("keyGo").click(); });
+
+// ----- names mode (codenames or aggregate only) -----
+let names = qs.get("names") === "hidden" ? "hidden" : "codenames";
+try{ if(!qs.get("names")) names = sessionStorage.getItem("stp_names") || names; }catch(e){}
+function syncNamesSeg(){ document.querySelectorAll("#namesSeg button").forEach(x=>x.classList.toggle("on", x.dataset.n===names)); }
+syncNamesSeg();
+document.querySelectorAll("#namesSeg button").forEach(b=>b.onclick=()=>{
+  names = b.dataset.n; syncNamesSeg(); try{ sessionStorage.setItem("stp_names", names); }catch(e){} load();
+});
 
 // ----- range -----
 let range = "today";
@@ -274,6 +298,12 @@ function render(d){
   $("distEmpty").classList.toggle("hidden", d.completed > 0);
   drawTiers(d.tiers, d.completed);
   drawFooled(d.perEmail);
+  const hidden = !!d.namesHidden;
+  $("lbCard").classList.toggle("hidden", hidden); $("aggCard").classList.toggle("hidden", !hidden);
+  const tp = d.topScores || {perfect:d.distribution[10], ninePlus:d.distribution[9]+d.distribution[10]};
+  $("aPerfect").textContent = tp.perfect; $("a9").textContent = tp.ninePlus;
+  $("aTop").textContent = d.completed ? pct((d.distribution[8]+d.distribution[9]+d.distribution[10])/d.completed) : "0%";
+  if(hidden) return;
   const medal = i => ["🥇","🥈","🥉"][i] || (i+1);
   $("lb").innerHTML = d.leaderboard.length ? d.leaderboard.map((p,i)=>`<tr><td class="rank"><span class="medal">${medal(i)}</span></td><td>${esc(p.name)}</td><td class="r sc">${p.score}/10</td></tr>`).join("")
     : `<tr><td colspan="3" style="color:var(--muted);text-align:center;padding:18px">No finishers yet</td></tr>`;
@@ -289,6 +319,7 @@ async function load(){
     const u = new URL("/api/stats", location.origin);
     if(key) u.searchParams.set("key", key);
     const s = sinceIso(); if(s) u.searchParams.set("since", s);
+    if(names === "hidden") u.searchParams.set("names", "hidden");
     const r = await fetch(u, {cache:"no-store"});
     const d = await r.json().catch(()=>({ok:false,error:"Bad response"}));
     if(r.status === 401){ $("dash").classList.add("hidden"); $("authBox").classList.remove("hidden"); $("errBox").classList.add("hidden"); $("upd").textContent="Locked"; $("dot").classList.add("off"); return; }
