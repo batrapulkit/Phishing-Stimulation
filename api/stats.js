@@ -1,13 +1,14 @@
 // Vercel serverless function: cumulative stats for /dashboard.
-// Reads scores from the Google Sheet (via the Apps Script doGet) and returns
-// aggregates only. Emails and phone numbers never leave the sheet.
+// Reads scores from Supabase and returns aggregates only.
+// Emails and phone numbers are never selected, so they never leave the database.
 //
 // Env vars:
-//   SHEET_WEBHOOK_URL  - same Apps Script /exec URL used by api/submit.js
-//   SHEET_SECRET       - same secret as in Code.gs
-//   DASHBOARD_KEY      - optional. If set, the dashboard must be opened with ?key=<value>
+//   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY  (see api/_supabase.js)
+//   DASHBOARD_KEY  - optional. If set, the dashboard must be opened with ?key=<value>
 //
 // Query: ?since=<ISO date>  only count entries at/after this time (e.g. this webinar)
+
+const { selectAll, count } = require("./_supabase");
 
 const N_EMAILS = 10;
 
@@ -81,26 +82,19 @@ module.exports = async (req, res) => {
   const key = process.env.DASHBOARD_KEY;
   if (key && req.query.key !== key) return res.status(401).json({ ok: false, error: "unauthorized" });
 
-  const url = process.env.SHEET_WEBHOOK_URL;
-  if (!url) return res.status(500).json({ ok: false, error: "SHEET_WEBHOOK_URL is not set on Vercel" });
-
   try {
-    const u = new URL(url);
-    u.searchParams.set("action", "rows");
-    u.searchParams.set("secret", process.env.SHEET_SECRET || "");
-    const r = await fetch(u.toString(), { redirect: "follow" });
-    const data = await r.json();
-    if (!data.ok) return res.status(502).json({ ok: false, error: "Sheet said: " + (data.error || "unknown error") });
-
     const since = req.query.since ? new Date(req.query.since) : null;
-    const keep = (row) => !since || isNaN(since) || new Date(row.t) >= since;
-    const players = (data.players || []).filter(keep);
-    const results = (data.results || []).filter(keep);
-
+    const filter = since && !isNaN(since) ? `created_at=gte.${encodeURIComponent(since.toISOString())}` : "";
+    const [signups, rows] = await Promise.all([
+      count("players", filter),
+      selectAll("results", `select=created_at,name,score,phishing_missed,legit_reported,answers&order=created_at.asc${filter ? "&" + filter : ""}`),
+    ]);
+    const results = rows.map(r => ({ t: r.created_at, name: r.name || "", score: `${r.score}/10`, missed: r.phishing_missed, fa: r.legit_reported, answers: r.answers || "" }));
+    const players = Array.from({ length: signups });
     return res.status(200).json({ ok: true, updatedAt: new Date().toISOString(), ...aggregate(players, results) });
   } catch (err) {
-    console.error("stats failed:", err);
-    return res.status(502).json({ ok: false, error: "Could not read the Google Sheet. Did you redeploy the Apps Script as a new version?" });
+    console.error("stats failed:", err.message);
+    return res.status(502).json({ ok: false, error: /not set/.test(err.message) ? err.message : "Could not read from Supabase. Check the Vercel logs." });
   }
 };
 
