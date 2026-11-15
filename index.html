@@ -132,6 +132,7 @@ section.alt{background:var(--bg2)}
 .field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,140,255,.2)}
 .field input.bad{border-color:var(--bad)}
 .err{display:block;color:var(--bad);font-size:12.5px;margin-top:5px;min-height:0}
+.opt{font-weight:500;color:var(--muted);font-size:12.5px}
 .consent{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:#c7cfdf;margin:4px 0 6px;cursor:pointer}
 .consent input{margin-top:3px;width:18px;height:18px;accent-color:var(--accent);flex:none}
 #startBtn{margin-top:12px}
@@ -384,14 +385,14 @@ footer .container{display:flex;justify-content:space-between;gap:16px;flex-wrap:
     <div class="sec-h"><div class="k">The challenge</div><h2>Your inbox has 10 new emails</h2><p>Careful: not every email is a scam. Reporting everything costs points too.</p></div>
     <div class="game-wrap">
       <div id="start" class="card">
-        <h3>Enter your details to start</h3>
-        <p class="muted" style="font-size:14px">Takes 10 seconds. Then your inbox opens full screen.</p>
+        <h3>Ready to play?</h3>
+        <p class="muted" style="font-size:14px">Add your details if you'd like your results and tips. All fields are optional, so you can skip straight to the game.</p>
         <form id="leadForm" novalidate>
           <p class="hidden" aria-hidden="true"><label>Leave this empty: <input id="fBot" name="website" tabindex="-1" autocomplete="off"></label></p>
-          <div class="field"><label for="fName">Full name</label><input id="fName" name="name" type="text" autocomplete="name" placeholder="e.g. Priya Sharma" required><span class="err" id="eName"></span></div>
-          <div class="field"><label for="fEmail">Email</label><input id="fEmail" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required><span class="err" id="eEmail"></span></div>
-          <div class="field"><label for="fPhone">Phone number</label><input id="fPhone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+91 98765 43210" required><span class="err" id="ePhone"></span></div>
-          <label class="consent"><input type="checkbox" id="fConsent" name="consent" value="yes" required><span>I agree to be contacted about cybersecurity training and resources. My details won't be sold or shared.</span></label>
+          <div class="field"><label for="fName">Full name <span class="opt">(optional)</span></label><input id="fName" name="name" type="text" autocomplete="name" placeholder="e.g. Priya Sharma"><span class="err" id="eName"></span></div>
+          <div class="field"><label for="fEmail">Email <span class="opt">(optional)</span></label><input id="fEmail" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com"><span class="err" id="eEmail"></span></div>
+          <div class="field"><label for="fPhone">Phone number <span class="opt">(optional)</span></label><input id="fPhone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+91 98765 43210"><span class="err" id="ePhone"></span></div>
+          <label class="consent hidden" id="consentRow"><input type="checkbox" id="fConsent" name="consent" value="yes"><span>I agree to be contacted about cybersecurity training and resources. My details won't be sold or shared.</span></label>
           <span class="err" id="eConsent"></span>
           <button class="btn full" type="submit" id="startBtn">Open my inbox ▶</button>
         </form>
@@ -439,7 +440,7 @@ footer .container{display:flex;justify-content:space-between;gap:16px;flex-wrap:
   <div class="container">
     <div class="sec-h"><div class="k">FAQ</div><h2>Questions</h2></div>
     <div class="faq">
-      <details class="q"><summary>Is this safe to play?</summary><p>Yes. Every email, company, person and domain is fictional. No link or attachment in the emails opens. We only store the name, email and phone number you enter, plus your final score.</p></details>
+      <details class="q"><summary>Is this safe to play?</summary><p>Yes. Every email, company, person and domain is fictional. No link or attachment in the emails opens. Your name, email and phone are optional. We store only what you choose to enter, plus your score.</p></details>
       <details class="q"><summary>Why do you ask for my details?</summary><p>So we can send you your result and follow up with cybersecurity training and resources. Your details are never sold or shared. Nothing to install: it runs in your browser on any phone or laptop.</p></details>
       <details class="q"><summary>Why are some emails real?</summary><p>Because real inboxes are mostly real email. If you report everything, you ignore genuine alerts and slow your team down. Good security is about judging accurately, not panicking.</p></details>
       <details class="q"><summary>What are SPF, DKIM and DMARC?</summary><p>Checks that confirm whether an email really came from the domain it claims. A fail is a strong warning sign. A pass only proves the sender owns that domain, which an attacker can do with a look-alike domain.</p></details>
@@ -709,6 +710,7 @@ function openSheet(label, html, note){ $("sheetLbl").textContent=label; $("sheet
 function closeSheet(){ $("sheet").classList.remove("on"); $("scrim").classList.remove("on"); }
 $("sheetClose").onclick = closeSheet; $("scrim").onclick = closeSheet;
 const scoreNow = ()=>answers.filter(a=>a&&a.correct).length;
+const firstName = ()=> (player && player.name) ? player.name.trim().split(/\s+/)[0] : "";
 
 // ---------- full-screen inbox ----------
 function openApp(){ $("app").classList.remove("hidden"); lock(true); renderEmail(); }
@@ -818,7 +820,7 @@ function finish(){
   const C = 2*Math.PI*64, off = C*(1-score/10);
   const blind = EMAILS.filter((e,i)=>!answers[i].correct).map(e=>TYPES[e.id]);
   const date = new Date().toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"});
-  const who = player ? esc(player.name) : "Your result";
+  const who = (player && player.name) ? esc(player.name) : "Your result";
   const ctaHref = esc(CONFIG.ctaUrl || "#");
 
   $("spWrap").innerHTML = `
@@ -833,7 +835,7 @@ function finish(){
         </div>
         <div>
           <span class="tier" style="background:${tier.c}22;color:${tier.c}">${tier.t}</span>
-          <h2>${player ? esc(player.name.split(" ")[0]) + ", y" : "Y"}ou scored ${score} out of 10</h2>
+          <h2>${firstName() ? esc(firstName()) + ", y" : "Y"}ou scored ${score} out of 10</h2>
           <p>${tier.d}</p>
         </div>
       </div>
@@ -885,20 +887,20 @@ $("spClose").onclick = ()=>closeScore();
 function updateReady(){
   if(!player){ $("start").classList.remove("hidden"); $("ready").classList.add("hidden"); return; }
   $("start").classList.add("hidden"); $("ready").classList.remove("hidden");
-  const first = esc(player.name.split(" ")[0]);
+  const first = esc(firstName());
   if(playing){
-    $("readyH").textContent = `Your inbox is waiting, ${player.name.split(" ")[0]}`;
+    $("readyH").textContent = first ? `Your inbox is waiting, ${firstName()}` : "Your inbox is waiting";
     $("readyP").textContent = `You're on email ${idx+1} of 10.`;
     $("readyBtns").innerHTML = `<button class="btn full" id="rb1">Resume challenge ▶</button>`;
     $("rb1").onclick = openApp;
   } else if(finished){
-    $("readyH").textContent = `Nice work, ${player.name.split(" ")[0]}`;
+    $("readyH").textContent = first ? `Nice work, ${firstName()}` : "Nice work";
     $("readyP").textContent = `You scored ${scoreNow()}/10.`;
     $("readyBtns").innerHTML = `<button class="btn full" id="rb1">View my scorecard</button><button class="btn ghost full" id="rb2">Play again</button>`;
     $("rb1").onclick = ()=>{ $("scorepage").classList.remove("hidden"); lock(true); };
     $("rb2").onclick = start;
   } else {
-    $("readyH").innerHTML = `Ready, ${first}?`;
+    $("readyH").innerHTML = first ? `Ready, ${first}?` : "Ready?";
     $("readyP").textContent = "10 emails. Some are attacks. Your inbox opens full screen.";
     $("readyBtns").innerHTML = `<button class="btn full" id="rb1">Open my inbox ▶</button>`;
     $("rb1").onclick = start;
@@ -916,20 +918,24 @@ $("leadForm").addEventListener("submit", ev=>{
   ev.preventDefault();
   const name = $("fName").value.trim(), email = $("fEmail").value.trim(), phoneRaw = $("fPhone").value.trim();
   const digits = phoneRaw.replace(/\D/g,"");
+  const contact = !!(email || phoneRaw);
   let ok = true;
-  ok = setErr("fName","eName", name.length < 2 ? "Please enter your name." : "") && ok;
-  ok = setErr("fEmail","eEmail", /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) ? "" : "Please enter a valid email.") && ok;
-  ok = setErr("fPhone","ePhone", (digits.length >= 10 && digits.length <= 15) ? "" : "Please enter a valid phone number (at least 10 digits).") && ok;
-  ok = setErr(null,"eConsent", $("fConsent").checked ? "" : "Please tick the box to continue.") && ok;
+  ok = setErr("fName","eName", (name && name.length < 2) ? "Name looks too short. Fix it or leave it empty." : "") && ok;
+  ok = setErr("fEmail","eEmail", (!email || /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) ? "" : "That email doesn't look right. Fix it or leave it empty.") && ok;
+  ok = setErr("fPhone","ePhone", (!phoneRaw || (digits.length >= 10 && digits.length <= 15)) ? "" : "Enter at least 10 digits, or leave it empty.") && ok;
+  ok = setErr(null,"eConsent", (!contact || $("fConsent").checked) ? "" : "Tick the box so we can contact you, or clear your email and phone.") && ok;
   if(!ok) return;
-  player = {name, email, phone: phoneRaw};
+  player = {name, email, phone: phoneRaw, consent: contact ? "yes" : "no"};
   try{ sessionStorage.setItem("stp_player", JSON.stringify(player)); }catch(e){}
   $("startBtn").disabled = true; $("startBtn").textContent = "Opening inbox…";
-  Promise.race([postForm("players", {...player, consent:"yes"}), new Promise(r=>setTimeout(r,1500))]).then(()=>{
+  Promise.race([postForm("players", player), new Promise(r=>setTimeout(r,1500))]).then(()=>{
     $("startBtn").disabled = false; $("startBtn").textContent = "Open my inbox ▶";
     start();
   });
 });
+
+function syncConsent(){ const show = !!($("fEmail").value.trim() || $("fPhone").value.trim()); $("consentRow").classList.toggle("hidden", !show); if(!show) $("eConsent").textContent = ""; }
+["fEmail","fPhone"].forEach(id=>$(id).addEventListener("input", syncConsent));
 
 function sendResults(score, missed, fa){
   if(!player) return;
@@ -947,6 +953,7 @@ function start(){ idx=0; answers=[]; playing=true; finished=false; updateReady()
 document.addEventListener("keydown", ev=>{
   if(ev.key==="Escape"){ if($("sheet").classList.contains("on")) closeSheet(); }
 });
+if(player){ $("fName").value = player.name || ""; $("fEmail").value = player.email || ""; $("fPhone").value = player.phone || ""; syncConsent(); }
 updateReady();
 </script>
 </body>

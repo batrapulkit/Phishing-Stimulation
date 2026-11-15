@@ -33,11 +33,13 @@ module.exports = async (req, res) => {
   const type = body.type;
   if (!FIELDS[type]) return res.status(400).json({ ok: false, error: "Unknown type" });
 
+  // Name, email and phone are all optional; if given, they must look valid.
   const email = clean(body.email, 120);
   const phoneDigits = clean(body.phone, 30).replace(/\D/g, "");
-  if (clean(body.name).length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || phoneDigits.length < 10 || phoneDigits.length > 15) {
-    return res.status(400).json({ ok: false, error: "Invalid details" });
-  }
+  const badEmail = email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+  const badPhone = phoneDigits && (phoneDigits.length < 10 || phoneDigits.length > 15);
+  if (badEmail || badPhone) return res.status(400).json({ ok: false, error: "Invalid details" });
+  if (type === "results" && !/^\d{1,2}\/10$/.test(clean(body.score))) return res.status(400).json({ ok: false, error: "Invalid score" });
 
   const row = { type };
   for (const f of FIELDS[type]) row[f] = safeCell(clean(body[f]));
