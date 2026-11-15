@@ -136,11 +136,6 @@ section.alt{background:var(--bg2)}
 .consent input{margin-top:3px;width:18px;height:18px;accent-color:var(--accent);flex:none}
 #startBtn{margin-top:12px}
 
-/* sticky mobile decision bar */
-.bar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(11,15,23,.94);backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:12px 14px calc(12px + env(safe-area-inset-bottom));transform:translateY(110%);transition:transform .2s}
-.bar.on{transform:none}
-.bar .in{max-width:580px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:10px}
-
 /* sheet */
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:60;background:var(--bg2);border-top:1px solid var(--line);border-radius:16px 16px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom));transform:translateY(110%);transition:transform .2s;max-width:580px;margin:0 auto;box-shadow:0 -10px 40px rgba(0,0,0,.5)}
 .sheet.on{transform:none}
@@ -149,6 +144,155 @@ section.alt{background:var(--bg2)}
 .sheet .url mark{background:rgba(245,165,36,.25);color:var(--warn);padding:0 2px;border-radius:3px}
 .scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:55;opacity:0;pointer-events:none;transition:opacity .2s}
 .scrim.on{opacity:1;pointer-events:auto}
+
+/* ===== full-screen email app (light, like a real mail client) ===== */
+body.locked{overflow:hidden}
+.app{position:fixed;inset:0;z-index:50;background:#f3f5f9;color:#1f2328;display:flex;flex-direction:column;font-family:Inter,system-ui,sans-serif}
+.appbar{position:relative;flex:none;display:flex;align-items:center;gap:12px;background:#fff;border-bottom:1px solid #e3e7ee;padding:calc(10px + env(safe-area-inset-top)) 16px 10px}
+.ab-btn{appearance:none;border:1px solid #e3e7ee;background:#fff;color:#4b5563;width:38px;height:38px;border-radius:10px;font-size:16px;cursor:pointer;flex:none}
+.ab-btn:hover{background:#f3f5f9}
+.ab-btn.dark{background:transparent;border-color:var(--line);color:var(--text)}
+.ab-title{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.ab-title span{display:flex;flex-direction:column;line-height:1.2}
+.ab-title b{font-size:15px}
+.ab-title small{font-size:12.5px;color:#6b7280}
+.ab-score{font:600 13px 'JetBrains Mono',monospace;background:#eef2ff;color:#3b5bdb;padding:7px 12px;border-radius:999px;flex:none}
+.ab-prog{position:absolute;left:0;right:0;bottom:-1px;height:3px;background:transparent}
+.ab-prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .35s}
+.app-body{flex:1;min-height:0;display:grid;grid-template-columns:300px 1fr}
+.side{background:#fff;border-right:1px solid #e3e7ee;overflow:auto}
+.side-h{padding:14px 16px;font-weight:700;font-size:14px;display:flex;justify-content:space-between;border-bottom:1px solid #eef0f4}
+.side-h span{font-weight:600;color:#6b7280;font-size:12.5px}
+.si{display:flex;gap:10px;padding:12px 16px;border-bottom:1px solid #f1f3f6;font-size:13px;position:relative}
+.si.cur{background:#eef3ff;box-shadow:inset 3px 0 0 var(--accent)}
+.si .st{width:20px;height:20px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:11px;font-weight:700;margin-top:1px;background:#eef0f4;color:#9aa3b2}
+.si .st.ok{background:#dcfce7;color:#15803d}.si .st.no{background:#fee2e2;color:#b91c1c}
+.si .tx{min-width:0;flex:1}
+.si .nm{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.si.done .nm{font-weight:500;color:#4b5563}
+.si .sb{color:#6b7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.si.locked{opacity:.55}
+.main{overflow:auto;padding:24px 24px 150px;-webkit-overflow-scrolling:touch}
+.reader{max-width:820px;margin:0 auto;background:#fff;border:1px solid #e3e7ee;border-radius:16px;padding:28px 32px 32px;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.r-subj{display:flex;align-items:flex-start;gap:10px;margin-bottom:18px}
+.r-subj h1{font-size:22px;line-height:1.3;margin:0;letter-spacing:-.01em;color:#111827;flex:1}
+.r-label{font-size:11.5px;background:#eef0f4;color:#4b5563;padding:3px 8px;border-radius:6px;flex:none;margin-top:4px}
+.r-from{display:flex;gap:12px;align-items:flex-start}
+.r-av{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;flex:none}
+.r-who{flex:1;min-width:0}
+.r-l1{font-size:15px;color:#111827;word-break:break-word}
+.r-l1 b{margin-right:6px}
+.r-addr{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#6b7280;word-break:break-all}
+.r-l2{font-size:13px;color:#6b7280;margin-top:2px}
+.r-date{font-size:13px;color:#6b7280;flex:none;white-space:nowrap}
+.r-detbtn{appearance:none;border:1px solid #d6dbe5;background:#f8fafc;color:#2563eb;font:600 13px Inter;padding:6px 11px;border-radius:8px;cursor:pointer;margin-top:8px}
+.r-details{margin:12px 0 0 54px;background:#f8fafc;border:1px solid #e3e7ee;border-radius:10px;padding:12px 14px;display:grid;grid-template-columns:96px 1fr;gap:6px 10px;font:12.5px 'JetBrains Mono',monospace;color:#111827}
+.r-details span:nth-child(odd){color:#6b7280}
+.r-details span{word-break:break-all}
+.r-details .pass{color:#15803d;font-weight:600}.r-details .fail{color:#b91c1c;font-weight:600}.r-details .neutral{color:#b45309;font-weight:600}
+.r-hr{border:0;border-top:1px solid #eef0f4;margin:20px 0}
+.r-body{font-size:15.5px;line-height:1.65;color:#1f2937}
+.r-body p{color:#1f2937;margin:0 0 14px}
+.r-body a.l{color:#1d4ed8;text-decoration:underline;cursor:pointer}
+.r-body .cta{display:inline-block;padding:11px 20px;border-radius:8px;color:#fff!important;text-decoration:none!important;font-weight:600;margin:4px 0 14px;cursor:pointer}
+.r-body .sig{color:#6b7280;font-size:13.5px}
+.r-body .logo{font-weight:800;font-size:18px;margin-bottom:14px}
+.r-body small{color:#6b7280}
+.r-att{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;padding-top:16px;border-top:1px solid #eef0f4}
+.r-att .att{display:flex;align-items:center;gap:10px;border:1px solid #e3e7ee;border-radius:10px;padding:10px 14px;background:#f8fafc;cursor:pointer;font-size:13px;color:#111827}
+.r-att .ic{width:34px;height:34px;border-radius:7px;display:grid;place-items:center;font:700 10px 'JetBrains Mono',monospace;color:#fff}
+.r-tip{display:flex;gap:8px;align-items:center;margin:18px auto 0;max-width:820px;font-size:13px;color:#6b7280;justify-content:center;text-align:center}
+.app-foot{position:absolute;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-top:1px solid #e3e7ee;padding:12px 16px calc(12px + env(safe-area-inset-bottom));box-shadow:0 -6px 24px rgba(16,24,40,.06)}
+.foot-in{max-width:820px;margin:0 auto;display:grid;grid-template-columns:auto 1fr 1fr;gap:12px;align-items:center}
+.foot-q{font-weight:700;font-size:15px;color:#111827;padding-right:6px}
+.app .big{appearance:none;border:0;cursor:pointer;font:800 17px Inter;padding:16px 10px;border-radius:14px;transition:transform .08s}
+.app .big:active{transform:scale(.98)}
+.app .big.red{background:#ef4444;color:#fff}
+.app .big.green{background:#16a34a;color:#fff}
+/* verdict sheet */
+.vsheet{position:absolute;left:0;right:0;bottom:0;margin:0 auto;max-width:860px;background:#fff;border-radius:20px 20px 0 0;box-shadow:0 -20px 60px rgba(16,24,40,.25);transform:translateY(105%);transition:transform .28s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;max-height:82%;color:#111827}
+.vsheet.on{transform:none}
+.vsheet.min{transform:translateY(calc(100% - 132px - env(safe-area-inset-bottom)))}
+.vs-head{padding:16px 20px 14px;border-radius:20px 20px 0 0;display:flex;align-items:center;gap:12px;cursor:pointer;flex:none}
+.vs-head.ok{background:#dcfce7}.vs-head.no{background:#fee2e2}
+.vs-icon{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:20px;font-weight:800;color:#fff;flex:none}
+.ok .vs-icon{background:#16a34a}.no .vs-icon{background:#dc2626}
+.vs-title{flex:1;min-width:0}
+.vs-title b{display:block;font-size:17px}
+.vs-title span{font-size:13.5px;color:#374151}
+.vs-tog{font-size:12.5px;color:#374151;background:rgba(255,255,255,.7);border:0;border-radius:8px;padding:6px 10px;cursor:pointer;flex:none}
+.vs-body{overflow:auto;padding:16px 20px 8px}
+.vs-body p{color:#374151;margin:0 0 12px;font-size:15px}
+.vs-lbl{font:600 11px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#6b7280;margin:6px 0 8px}
+.vs-flags{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.vs-flags li{display:flex;gap:10px;font-size:14.5px;color:#1f2937;background:#f8fafc;border:1px solid #eef0f4;border-radius:10px;padding:10px 12px}
+.vs-flags li i{font-style:normal;flex:none}
+.vs-foot{flex:none;padding:12px 20px calc(14px + env(safe-area-inset-bottom));border-top:1px solid #eef0f4}
+
+/* ===== scorecard page ===== */
+.scorepage{position:fixed;inset:0;z-index:50;overflow:auto;background:radial-gradient(900px 500px at 50% -10%,rgba(124,92,255,.25),transparent 60%),var(--bg);color:var(--text)}
+.sp-top{position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:calc(12px + env(safe-area-inset-top)) 18px 12px;background:rgba(11,15,23,.8);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.sp-brand{font-weight:800}
+.sp-wrap{max-width:720px;margin:0 auto;padding:24px 16px calc(40px + env(safe-area-inset-bottom));display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+.sp-wrap>*{min-width:0}
+.sc-hero>div:last-child{min-width:0}
+.sc{background:linear-gradient(160deg,#151d30,#10172a);border:1px solid var(--line);border-radius:22px;padding:26px;position:relative;overflow:hidden}
+.sc::after{content:"";position:absolute;inset:auto -60px -80px auto;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(79,140,255,.18),transparent 70%)}
+.sc-k{font:600 12px 'JetBrains Mono',monospace;letter-spacing:.16em;color:var(--accent)}
+.sc-name{font-size:14px;color:var(--muted);margin-top:4px}
+.sc-hero{display:flex;align-items:center;gap:22px;margin:20px 0 22px}
+.ring{position:relative;width:150px;height:150px;flex:none}
+.ring svg{transform:rotate(-90deg)}
+.ring .rv{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.ring .rv b{font-size:42px;letter-spacing:-.04em;line-height:1}
+.ring .rv span{font-size:12.5px;color:var(--muted)}
+.tier{display:inline-block;font:700 12px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;padding:5px 10px;border-radius:8px;margin-bottom:8px}
+.sc-hero h2{font-size:26px;line-height:1.15;margin:0 0 8px}
+.sc-hero p{margin:0;font-size:14.5px}
+.sc-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.sc-stats div{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center}
+.sc-stats b{display:block;font-size:22px;letter-spacing:-.02em}
+.sc-stats span{font-size:12px;color:var(--muted);line-height:1.3;display:block}
+.sc-weak{margin-top:16px;font-size:14px;color:#c7cfdf}
+.sc-weak .chip{display:inline-block;font-size:12.5px;padding:4px 10px;border-radius:999px;background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.3);margin:6px 6px 0 0}
+.cta-card{border-radius:22px;padding:26px;background:linear-gradient(135deg,#2b5bd7,#6d4bd8);box-shadow:0 20px 50px rgba(79,92,255,.3)}
+.cta-card .ck{font:600 12px 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.75)}
+.cta-card h3{font-size:26px;line-height:1.15;margin:8px 0 8px;color:#fff}
+.cta-card p{color:rgba(255,255,255,.88);margin:0 0 18px}
+.cta-card .cbtn{display:block;text-align:center;background:#fff;color:#1e2a5a;font:800 17px Inter;padding:16px;border-radius:14px;text-decoration:none}
+.cta-card small{display:block;text-align:center;color:rgba(255,255,255,.75);margin-top:10px;font-size:12.5px}
+.bd{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:22px}
+.bd h3{margin:0 0 12px;font-size:18px}
+.bd-row{display:flex;gap:12px;align-items:center;padding:11px 0;border-top:1px solid var(--line);font-size:14px}
+.bd-row:first-of-type{border-top:0}
+.bd-n{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:12px;flex:none}
+.bd-n.ok{background:rgba(34,197,94,.15);color:var(--good)}.bd-n.no{background:rgba(239,68,68,.15);color:var(--bad)}
+.bd-t{flex:1;min-width:0}
+.bd-t b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bd-t span{font-size:12.5px;color:var(--muted)}
+.bd-v{font:600 11.5px 'JetBrains Mono',monospace;flex:none;padding:3px 8px;border-radius:6px}
+.bd-v.p{background:rgba(239,68,68,.12);color:#fca5a5}.bd-v.g{background:rgba(34,197,94,.12);color:#86efac}
+.sp-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+
+.r-date-m{display:none}
+@media (max-width:1000px){ .app-body{grid-template-columns:1fr} .side{display:none} }
+@media (max-width:640px){
+  .main{padding:0 0 150px}
+  .reader{border:0;border-radius:0;padding:20px 16px 24px;box-shadow:none}
+  .r-subj h1{font-size:19px}
+  .r-date{display:none}
+  .r-date-m{display:inline}
+  .r-details{margin-left:0}
+  .foot-in{grid-template-columns:1fr 1fr}
+  .foot-q{display:none}
+  .ab-title svg{display:none}
+  .sc{padding:20px}
+  .sc-hero{flex-direction:column;text-align:center;gap:14px}
+  .sc-stats{grid-template-columns:repeat(2,1fr)}
+  .sp-actions{grid-template-columns:1fr}
+  .cta-card{padding:22px}
+  .cta-card h3,.sc-hero h2{font-size:22px}
+}
 
 /* checklist + faq */
 .check{display:flex;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
@@ -239,12 +383,9 @@ footer .container{display:flex;justify-content:space-between;gap:16px;flex-wrap:
   <div class="container">
     <div class="sec-h"><div class="k">The challenge</div><h2>Your inbox has 10 new emails</h2><p>Careful: not every email is a scam. Reporting everything costs points too.</p></div>
     <div class="game-wrap">
-      <div class="gtop hidden" id="gtop"><span class="pill" id="pill">Email 1 of 10</span><span class="pill" id="scorePill">Score 0</span></div>
-      <div class="progress hidden" id="prog"><i id="progBar"></i></div>
-
       <div id="start" class="card">
         <h3>Enter your details to start</h3>
-        <p class="muted" style="font-size:14px">Takes 10 seconds. Then your inbox opens.</p>
+        <p class="muted" style="font-size:14px">Takes 10 seconds. Then your inbox opens full screen.</p>
         <form id="leadForm" novalidate>
           <p class="hidden" aria-hidden="true"><label>Leave this empty: <input id="fBot" name="website" tabindex="-1" autocomplete="off"></label></p>
           <div class="field"><label for="fName">Full name</label><input id="fName" name="name" type="text" autocomplete="name" placeholder="e.g. Priya Sharma" required><span class="err" id="eName"></span></div>
@@ -257,25 +398,10 @@ footer .container{display:flex;justify-content:space-between;gap:16px;flex-wrap:
         <p class="muted" style="margin:14px 0 0;font-size:12.5px;text-align:center">All companies, people and domains in the challenge are fictional.</p>
       </div>
 
-      <div id="game" class="hidden"><div id="mail"></div><div id="verdictBox"></div></div>
-
-      <div id="result" class="hidden">
-        <div class="card">
-          <span class="pill">Your result</span>
-          <div class="result-score grad" id="score"></div>
-          <h3 id="verdictH" style="margin-bottom:8px"></h3>
-          <p id="verdictP"></p>
-          <div class="split">
-            <div><b id="missed"></b><span>phishing emails you let through</span></div>
-            <div><b id="fa"></b><span>real emails you wrongly reported</span></div>
-          </div>
-          <div class="rlist" id="review"></div>
-          <div style="display:grid;gap:10px">
-            <a class="btn" href="#checklist">Learn the 6 red flags ↓</a>
-            <button class="btn ghost" id="copyBtn">Copy my score</button>
-            <button class="btn ghost" id="retryBtn">Play again</button>
-          </div>
-        </div>
+      <div id="ready" class="card hidden">
+        <h3 id="readyH">Welcome back</h3>
+        <p class="muted" id="readyP"></p>
+        <div style="display:grid;gap:10px;margin-top:16px" id="readyBtns"></div>
       </div>
     </div>
   </div>
@@ -335,9 +461,43 @@ footer .container{display:flex;justify-content:space-between;gap:16px;flex-wrap:
   </div>
 </footer>
 
-<div class="bar" id="bar"><div class="in" id="barIn">
-  <button class="big red" data-g="1">🚩 Phishing</button><button class="big green" data-g="0">✓ Legit</button>
-</div></div>
+<!-- ===== FULL-SCREEN EMAIL APP ===== -->
+<div class="app hidden" id="app" role="dialog" aria-modal="true" aria-label="Phishing challenge inbox">
+  <div class="appbar">
+    <button class="ab-btn" id="appClose" aria-label="Exit challenge">✕</button>
+    <div class="ab-title">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 6.5A2.5 2.5 0 015.5 4h13A2.5 2.5 0 0121 6.5v11a2.5 2.5 0 01-2.5 2.5h-13A2.5 2.5 0 013 17.5v-11z" stroke="#4f8cff" stroke-width="2"/><path d="M4 7l8 6 8-6" stroke="#4f8cff" stroke-width="2" stroke-linejoin="round"/></svg>
+      <span><b>Nimbus Mail</b><small id="abCount">Email 1 of 10</small></span>
+    </div>
+    <div class="ab-score" id="abScore">Score 0</div>
+    <div class="ab-prog"><i id="abProg"></i></div>
+  </div>
+  <div class="app-body">
+    <aside class="side">
+      <div class="side-h">Inbox <span id="sideCount">10</span></div>
+      <div id="sideList"></div>
+    </aside>
+    <main class="main" id="appMain"><article class="reader" id="reader"></article></main>
+  </div>
+  <div class="app-foot" id="appFoot">
+    <div class="foot-in">
+      <span class="foot-q">Is this email safe?</span>
+      <button class="big red" id="pBtn">🚩 Phishing</button>
+      <button class="big green" id="lBtn">✓ Legit</button>
+    </div>
+  </div>
+  <div class="vsheet" id="vsheet"></div>
+</div>
+
+<!-- ===== FULL-SCREEN SCORECARD ===== -->
+<div class="scorepage hidden" id="scorepage" role="dialog" aria-modal="true" aria-label="Your scorecard">
+  <div class="sp-top">
+    <span class="sp-brand">🛡️ Spot the Phish</span>
+    <button class="ab-btn dark" id="spClose" aria-label="Close scorecard">✕</button>
+  </div>
+  <div class="sp-wrap" id="spWrap"></div>
+</div>
+
 <div class="scrim" id="scrim"></div>
 <div class="sheet" id="sheet">
   <div class="lbl" id="sheetLbl"></div>
@@ -514,125 +674,247 @@ const EMAILS = [
 }
 ];
 
-const $ = id => document.getElementById(id);
-let idx = 0, answers = [], det = false, playing = false, playVisible = false;
+// ================== CONFIG: edit the scorecard call-to-action here ==================
+const CONFIG = {
+  ctaKicker: "Protect your team",
+  ctaTitle: "One click is all it takes. Is your team ready?",
+  ctaText: "Most breaches start with a phishing email. Get hands-on phishing awareness training for your team.",
+  ctaButton: "Book a free security session →",
+  ctaUrl: "#",            // <-- PUT YOUR LINK HERE (Calendly, WhatsApp, course page, Google Form...)
+  ctaNote: "Free 20-minute call · No obligation"
+};
+const TYPES = {1:"Look-alike domain",2:"Security alert",3:"CEO gift-card fraud",4:"HR announcement",5:"Invoice fraud",6:"Fake file share",7:"Order update",8:"Spoofed bank alert",9:"Manager email",10:"Payroll typosquat"};
+// ======================================================================================
 
-// nav
+const $ = id => document.getElementById(id);
+let idx = 0, answers = [], det = false, playing = false, finished = false;
+let player = null;
+try{ const s = sessionStorage.getItem("stp_player"); if(s) player = JSON.parse(s); }catch(e){}
+
+// ---------- nav ----------
 $("burger").onclick = ()=>$("mobmenu").classList.toggle("open");
 document.querySelectorAll("#mobmenu a").forEach(a=>a.addEventListener("click",()=>$("mobmenu").classList.remove("open")));
-
-function view(id){ ["start","game","result"].forEach(s=>$(s).classList.toggle("hidden",s!==id)); }
 function scrollToPlay(){ $("play").scrollIntoView({behavior:"smooth"}); }
+function lock(on){ document.body.classList.toggle("locked", on); }
+
+// ---------- helpers ----------
 function authCls(v){ return v==="pass"?"pass":v==="fail"?"fail":"neutral"; }
 function markDomain(u){
   try{ const url=new URL(u), host=url.hostname, reg=host.split(".").slice(-2).join(".");
     return `${url.protocol}//${host.slice(0,host.length-reg.length)}<mark>${reg}</mark>${url.pathname}${url.search}`; }
   catch(e){ return u; }
 }
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
 function openSheet(label, html, note){ $("sheetLbl").textContent=label; $("sheetUrl").innerHTML=html; $("sheetNote").textContent=note; $("sheet").classList.add("on"); $("scrim").classList.add("on"); }
 function closeSheet(){ $("sheet").classList.remove("on"); $("scrim").classList.remove("on"); }
 $("sheetClose").onclick = closeSheet; $("scrim").onclick = closeSheet;
+const scoreNow = ()=>answers.filter(a=>a&&a.correct).length;
 
-// mobile decision bar: only while an email is awaiting a decision and the game is on screen
-function updateBar(){ $("bar").classList.toggle("on", playing && playVisible && !answers[idx]); }
-new IntersectionObserver(es=>{ playVisible = es[0].isIntersecting; updateBar(); }, {threshold:0.05}).observe($("play"));
-document.querySelectorAll("#barIn .big").forEach(b=>b.onclick=()=>decide(b.dataset.g==="1"));
+// ---------- full-screen inbox ----------
+function openApp(){ $("app").classList.remove("hidden"); lock(true); renderEmail(); }
+function closeApp(){ $("app").classList.add("hidden"); lock(false); updateReady(); scrollToPlay(); }
+$("appClose").onclick = closeApp;
+
+function renderSide(){
+  $("sideList").innerHTML = EMAILS.map((e,i)=>{
+    const a = answers[i];
+    const st = a ? `<span class="st ${a.correct?"ok":"no"}">${a.correct?"✓":"✗"}</span>` : `<span class="st">${i+1}</span>`;
+    const cls = ["si", i===idx?"cur":"", a?"done":"", (!a && i>idx)?"locked":""].join(" ");
+    return `<div class="${cls}">${st}<div class="tx"><div class="nm">${esc(e.name)}</div><div class="sb">${esc(e.subject)}</div></div></div>`;
+  }).join("");
+  $("sideCount").textContent = `${answers.filter(Boolean).length}/10 reviewed`;
+}
 
 function renderEmail(){
   const e = EMAILS[idx], a = answers[idx];
-  det = !!a;
-  $("gtop").classList.remove("hidden"); $("prog").classList.remove("hidden");
-  $("progBar").style.width = ((idx+(a?1:0))/EMAILS.length*100)+"%";
-  $("pill").textContent = `Email ${idx+1} of ${EMAILS.length}`;
-  $("scorePill").textContent = `Score ${answers.filter(x=>x&&x.correct).length}`;
+  det = false;
+  $("abCount").textContent = `Email ${idx+1} of ${EMAILS.length}`;
+  $("abScore").textContent = `Score ${scoreNow()}/${answers.filter(Boolean).length}`;
+  $("abProg").style.width = ((idx + (a?1:0)) / EMAILS.length * 100) + "%";
   const initials = e.name.split(/\s+/).map(w=>w[0]).join("").slice(0,2).toUpperCase();
-  const att = (e.attach||[]).map(x=>`<div class="att" data-att="${x.n}"><div class="ic" style="background:${x.c}">${x.t}</div><div><b>${x.n}</b><div class="muted" style="font-size:12px">${x.s}</div></div></div>`).join("");
-  $("mail").innerHTML = `<div class="mailcard">
-    <div class="mhead">
-      <div class="subj">${e.subject}</div>
-      <div class="sender">
-        <div class="avatar" style="background:${e.color}">${initials}</div>
-        <div class="who"><b>${e.name}</b><span class="addr">${e.email}</span>
-          <span class="muted" style="font-size:12.5px">to ${e.to==="arjun.sharma@nimbuslabs.com"?"me":e.to} · ${e.date}</span><br>
-          <button class="toggle" id="detBtn">${det?"Hide sender details ▲":"🔍 Sender details ▼"}</button></div>
+  const att = (e.attach||[]).map(x=>`<div class="att" data-att="${x.n}"><div class="ic" style="background:${x.c}">${x.t}</div><div><b>${x.n}</b><div style="font-size:12px;color:#6b7280">${x.s}</div></div></div>`).join("");
+  $("reader").innerHTML = `
+    <div class="r-subj"><h1>${e.subject}</h1><span class="r-label">Inbox</span></div>
+    <div class="r-from">
+      <div class="r-av" style="background:${e.color}">${initials}</div>
+      <div class="r-who">
+        <div class="r-l1"><b>${e.name}</b><span class="r-addr">&lt;${e.email}&gt;</span></div>
+        <div class="r-l2">to ${e.to==="arjun.sharma@nimbuslabs.com"?"me":e.to}<span class="r-date-m"> · ${e.date}</span></div>
+        <button class="r-detbtn" id="detBtn">🔍 Show sender details</button>
       </div>
-      <div class="details ${det?"":"hidden"}" id="det">
-        <span>from:</span><span>${e.email}</span><span>reply-to:</span><span>${e.replyTo}</span><span>sent by:</span><span>${e.auth.by}</span>
-        <span>SPF:</span><span class="${authCls(e.auth.spf)}">${e.auth.spf.toUpperCase()}</span>
-        <span>DKIM:</span><span class="${authCls(e.auth.dkim)}">${e.auth.dkim.toUpperCase()}</span>
-        <span>DMARC:</span><span class="${authCls(e.auth.dmarc)}">${e.auth.dmarc.toUpperCase()}</span>
-      </div>
+      <div class="r-date">${e.date}</div>
     </div>
-    <div class="body">${e.body}</div>
-    ${att?`<div class="attach">${att}</div>`:""}
-  </div>
-  ${a?"":`<div class="decide desk"><button class="big red" id="pBtn">🚩 Phishing</button><button class="big green" id="lBtn">✓ Legit</button></div><p class="hint">Investigate first, then decide.</p>`}`;
-  $("detBtn").onclick = ()=>{ det=!det; $("det").classList.toggle("hidden",!det); $("detBtn").textContent = det?"Hide sender details ▲":"🔍 Sender details ▼"; };
-  if(!a){ $("pBtn").onclick=()=>decide(true); $("lBtn").onclick=()=>decide(false); }
-  document.querySelectorAll("#mail a.l").forEach(el=>el.onclick=ev=>{ ev.preventDefault(); openSheet("This link really goes to", markDomain(el.dataset.url), "The highlighted part is the real website. Links are disabled in this challenge."); });
-  document.querySelectorAll("#mail .att").forEach(el=>el.onclick=()=>openSheet("Attachment", el.dataset.att, "Attachments are disabled. Ask yourself: does this file type make sense?"));
-  $("verdictBox").innerHTML = a ? verdictHTML() : "";
-  if(a) wireNext();
-  updateBar();
+    <div class="r-details hidden" id="det">
+      <span>from:</span><span>${e.email}</span>
+      <span>reply-to:</span><span>${e.replyTo}</span>
+      <span>to:</span><span>${e.to}</span>
+      <span>sent by:</span><span>${e.auth.by}</span>
+      <span>SPF:</span><span class="${authCls(e.auth.spf)}">${e.auth.spf.toUpperCase()}</span>
+      <span>DKIM:</span><span class="${authCls(e.auth.dkim)}">${e.auth.dkim.toUpperCase()}</span>
+      <span>DMARC:</span><span class="${authCls(e.auth.dmarc)}">${e.auth.dmarc.toUpperCase()}</span>
+    </div>
+    <hr class="r-hr">
+    <div class="r-body">${e.body}</div>
+    ${att?`<div class="r-att">${att}</div>`:""}`;
+  $("detBtn").onclick = ()=>{ det=!det; $("det").classList.toggle("hidden",!det); $("detBtn").textContent = det?"Hide sender details":"🔍 Show sender details"; };
+  document.querySelectorAll("#reader a.l").forEach(el=>el.onclick=ev=>{ ev.preventDefault(); openSheet("This link really goes to", markDomain(el.dataset.url), "The highlighted part is the real website. Links are disabled in this challenge."); });
+  document.querySelectorAll("#reader .att").forEach(el=>el.onclick=()=>openSheet("Attachment", el.dataset.att, "Attachments are disabled. Ask yourself: does this file type make sense?"));
+  $("appMain").scrollTop = 0;
+  renderSide();
+  if(a){ showVerdict(); } else { $("vsheet").className = "vsheet"; $("appFoot").classList.remove("hidden"); }
 }
 
 function decide(guess){
   if(answers[idx]) return;
   answers[idx] = {guess, correct: guess===EMAILS[idx].phish};
-  renderEmail();
-  setTimeout(()=>$("verdictBox").scrollIntoView({behavior:"smooth",block:"start"}),60);
+  // reveal sender details so the explanation lines up with what they can see
+  det = true; $("det").classList.remove("hidden"); $("detBtn").textContent = "Hide sender details";
+  $("abScore").textContent = `Score ${scoreNow()}/${answers.filter(Boolean).length}`;
+  $("abProg").style.width = ((idx+1) / EMAILS.length * 100) + "%";
+  renderSide();
+  showVerdict();
+}
+$("pBtn").onclick = ()=>decide(true);
+$("lBtn").onclick = ()=>decide(false);
+
+function showVerdict(){
+  const e = EMAILS[idx], a = answers[idx], last = idx === EMAILS.length-1;
+  $("appFoot").classList.add("hidden");
+  const vs = $("vsheet");
+  vs.innerHTML = `
+    <div class="vs-head ${a.correct?"ok":"no"}" id="vsHead">
+      <div class="vs-icon">${a.correct?"✓":"✗"}</div>
+      <div class="vs-title"><b>${a.correct?"Correct!":"Not quite."} It's ${e.phish?"PHISHING":"LEGIT"}</b><span>You said ${a.guess?"Phishing":"Legit"} · ${TYPES[e.id]}</span></div>
+      <button class="vs-tog" id="vsTog">Hide ▾</button>
+    </div>
+    <div class="vs-body">
+      <p>${e.why}</p>
+      <div class="vs-lbl">${e.phish?"Red flags":"Why it checks out"}</div>
+      <ul class="vs-flags">${e.flags.map(f=>`<li><i>${e.phish?"🚩":"✅"}</i><span>${f}</span></li>`).join("")}</ul>
+    </div>
+    <div class="vs-foot"><button class="btn full" id="vsNext">${last?"See my scorecard →":"Next email →"}</button></div>`;
+  vs.className = "vsheet on";
+  const toggle = ()=>{ const m = vs.classList.toggle("min"); $("vsTog").textContent = m ? "Show ▴" : "Hide ▾"; };
+  $("vsHead").onclick = toggle;
+  $("vsNext").onclick = ev=>{ ev.stopPropagation(); if(last) finish(); else { idx++; renderEmail(); } };
 }
 
-function verdictHTML(){
-  const e=EMAILS[idx], a=answers[idx], last = idx===EMAILS.length-1;
-  return `<div class="verdict ${a.correct?"ok":"no"}">
-    <h4>${a.correct?"✓ Correct!":"✗ Not quite"} This email is ${e.phish?"PHISHING":"LEGIT"}</h4>
-    <p style="margin:0">${e.why}</p>
-    <div class="lbl">${e.phish?"🚩 Red flags":"✓ Why it checks out"}</div>
-    <ul>${e.flags.map(f=>`<li>${f}</li>`).join("")}</ul>
-    <button class="btn full" id="nBtn">${last?"See my score →":"Next email →"}</button></div>`;
-}
-function wireNext(){
-  $("nBtn").onclick = ()=>{ if(idx===EMAILS.length-1) finish(); else { idx++; renderEmail(); scrollToPlay(); } };
+// ---------- scorecard ----------
+function tierFor(s){
+  if(s===10) return {t:"Phish-proof",c:"#22c55e",d:"Perfect. You caught every attack and trusted every real email. That's exactly the judgement attackers can't beat."};
+  if(s>=8)  return {t:"Strong defender",c:"#4f8cff",d:"You'd stop most attacks. The few you missed show exactly how an attacker would get to you."};
+  if(s>=5)  return {t:"At risk",c:"#f5a524",d:"You catch the obvious ones, but a targeted attack would probably get through."};
+  return {t:"High risk",c:"#ef4444",d:"An attacker would have a good chance with you right now. The good news: this is very trainable."};
 }
 
 function finish(){
-  playing = false; updateBar();
-  const score = answers.filter(a=>a.correct).length;
-  const pT = EMAILS.filter(e=>e.phish).length, lT = EMAILS.length-pT;
-  const missed = EMAILS.filter((e,i)=>e.phish && !answers[i].guess).length;
+  playing = false; finished = true;
+  const score = scoreNow();
+  const pT = EMAILS.filter(e=>e.phish).length, lT = EMAILS.length - pT;
+  const caught = EMAILS.filter((e,i)=>e.phish && answers[i].guess).length;
+  const missed = pT - caught;
   const fa = EMAILS.filter((e,i)=>!e.phish && answers[i].guess).length;
-  $("score").textContent = `${score}/10`;
-  let h,p;
-  if(score===10){h="Phish-proof 🛡️";p="Perfect. You caught every attack and didn't panic on the real emails.";}
-  else if(score>=8){h="Strong defender";p="You'd stop most attacks. The ones you missed below are exactly how an attacker would get you.";}
-  else if(score>=5){h="At risk";p="You'd catch the obvious ones, but a targeted attack would probably get through.";}
-  else{h="High risk";p="An attacker would have a good chance with you right now. Read the red flags below and play again.";}
-  if(player) h = `${player.name.split(" ")[0]}, ${h.charAt(0).toLowerCase()+h.slice(1)}`;
-  $("verdictH").textContent=h; $("verdictP").textContent=p;
+  const tier = tierFor(score);
+  const C = 2*Math.PI*64, off = C*(1-score/10);
+  const blind = EMAILS.filter((e,i)=>!answers[i].correct).map(e=>TYPES[e.id]);
+  const date = new Date().toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"});
+  const who = player ? esc(player.name) : "Your result";
+  const ctaHref = esc(CONFIG.ctaUrl || "#");
+
+  $("spWrap").innerHTML = `
+    <div class="sc">
+      <div class="sc-k">PHISHING SCORECARD</div>
+      <div class="sc-name">${who} · ${date}</div>
+      <div class="sc-hero">
+        <div class="ring">
+          <svg width="150" height="150" viewBox="0 0 150 150"><circle cx="75" cy="75" r="64" stroke="#26314a" stroke-width="12" fill="none"/>
+          <circle cx="75" cy="75" r="64" stroke="${tier.c}" stroke-width="12" fill="none" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C}" id="ringArc" style="transition:stroke-dashoffset 1.1s cubic-bezier(.2,.8,.2,1)"/></svg>
+          <div class="rv"><div><b>${score}/10</b><br><span>${score*10}% accuracy</span></div></div>
+        </div>
+        <div>
+          <span class="tier" style="background:${tier.c}22;color:${tier.c}">${tier.t}</span>
+          <h2>${player ? esc(player.name.split(" ")[0]) + ", y" : "Y"}ou scored ${score} out of 10</h2>
+          <p>${tier.d}</p>
+        </div>
+      </div>
+      <div class="sc-stats">
+        <div><b style="color:var(--good)">${caught}/${pT}</b><span>attacks caught</span></div>
+        <div><b style="color:${missed?"var(--bad)":"var(--good)"}">${missed}</b><span>attacks missed</span></div>
+        <div><b style="color:${fa?"var(--warn)":"var(--good)"}">${fa}/${lT}</b><span>false alarms</span></div>
+        <div><b>${score*10}%</b><span>overall accuracy</span></div>
+      </div>
+      ${blind.length?`<div class="sc-weak">Your blind spots:<br>${blind.map(b=>`<span class="chip">${b}</span>`).join("")}</div>`:`<div class="sc-weak">No blind spots. Every attack type caught. 🛡️</div>`}
+    </div>
+
+    <div class="cta-card">
+      <div class="ck">${esc(CONFIG.ctaKicker)}</div>
+      <h3>${esc(CONFIG.ctaTitle)}</h3>
+      <p>${esc(CONFIG.ctaText)}</p>
+      <a class="cbtn" id="ctaBtn" href="${ctaHref}" target="_blank" rel="noopener">${esc(CONFIG.ctaButton)}</a>
+      <small>${esc(CONFIG.ctaNote)}</small>
+    </div>
+
+    <div class="bd">
+      <h3>Email by email</h3>
+      ${EMAILS.map((e,i)=>{const a=answers[i];return `<div class="bd-row"><span class="bd-n ${a.correct?"ok":"no"}">${a.correct?"✓":"✗"}</span><div class="bd-t"><b>${esc(e.subject)}</b><span>${TYPES[e.id]} · you said ${a.guess?"Phishing":"Legit"}</span></div><span class="bd-v ${e.phish?"p":"g"}">${e.phish?"PHISH":"LEGIT"}</span></div>`}).join("")}
+    </div>
+
+    <div class="sp-actions">
+      <button class="btn ghost" id="spCopy">Copy my score</button>
+      <button class="btn ghost" id="spRetry">Play again</button>
+      <button class="btn ghost" id="spTips">Learn the red flags</button>
+    </div>`;
+
+  $("app").classList.add("hidden");
+  $("scorepage").classList.remove("hidden"); $("scorepage").scrollTop = 0; lock(true);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ const r=$("ringArc"); if(r) r.style.strokeDashoffset = off; }));
+
+  $("spCopy").onclick = async ()=>{
+    const t = `I scored ${score}/10 (${tier.t}) on Spot the Phish 🎣 Can you beat me? ${location.href.split("#")[0]}`;
+    try{ await navigator.clipboard.writeText(t); $("spCopy").textContent="Copied ✓"; }catch(e){ $("spCopy").textContent="Copy failed"; }
+    setTimeout(()=>$("spCopy").textContent="Copy my score",2500);
+  };
+  $("spRetry").onclick = ()=>{ closeScore(false); start(); };
+  $("spTips").onclick = ()=>{ closeScore(false); $("checklist").scrollIntoView({behavior:"smooth"}); };
   sendResults(score, missed, fa);
-  $("missed").textContent=`${missed}/${pT}`; $("fa").textContent=`${fa}/${lT}`;
-  $("review").innerHTML = EMAILS.map((e,i)=>`<div class="rrow"><span class="dot" style="background:${answers[i].correct?"var(--good)":"var(--bad)"}"></span><div><b>${i+1}. ${e.name}</b> <span class="muted">· ${e.phish?"Phishing":"Legit"}</span><div class="muted" style="font-size:12.5px">${e.subject}</div></div></div>`).join("");
-  $("gtop").classList.add("hidden"); $("prog").classList.add("hidden");
-  view("result"); scrollToPlay();
+}
+function closeScore(scroll=true){ $("scorepage").classList.add("hidden"); lock(false); updateReady(); if(scroll) scrollToPlay(); }
+$("spClose").onclick = ()=>closeScore();
+
+// ---------- section card state ----------
+function updateReady(){
+  if(!player){ $("start").classList.remove("hidden"); $("ready").classList.add("hidden"); return; }
+  $("start").classList.add("hidden"); $("ready").classList.remove("hidden");
+  const first = esc(player.name.split(" ")[0]);
+  if(playing){
+    $("readyH").textContent = `Your inbox is waiting, ${player.name.split(" ")[0]}`;
+    $("readyP").textContent = `You're on email ${idx+1} of 10.`;
+    $("readyBtns").innerHTML = `<button class="btn full" id="rb1">Resume challenge ▶</button>`;
+    $("rb1").onclick = openApp;
+  } else if(finished){
+    $("readyH").textContent = `Nice work, ${player.name.split(" ")[0]}`;
+    $("readyP").textContent = `You scored ${scoreNow()}/10.`;
+    $("readyBtns").innerHTML = `<button class="btn full" id="rb1">View my scorecard</button><button class="btn ghost full" id="rb2">Play again</button>`;
+    $("rb1").onclick = ()=>{ $("scorepage").classList.remove("hidden"); lock(true); };
+    $("rb2").onclick = start;
+  } else {
+    $("readyH").innerHTML = `Ready, ${first}?`;
+    $("readyP").textContent = "10 emails. Some are attacks. Your inbox opens full screen.";
+    $("readyBtns").innerHTML = `<button class="btn full" id="rb1">Open my inbox ▶</button>`;
+    $("rb1").onclick = start;
+  }
 }
 
-// ---- lead capture: POST to /api/submit (Vercel function -> Google Sheet) ----
-let player = null;
-try{ const s = sessionStorage.getItem("stp_player"); if(s) player = JSON.parse(s); }catch(e){}
-
+// ---------- lead capture: POST to /api/submit (Vercel function -> Google Sheet) ----------
 function postForm(type, data){
   const payload = {type, ...data, website: ($("fBot")||{}).value || ""};
   return fetch("/api/submit", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(payload), keepalive:true}).catch(()=>{});
 }
-
 function setErr(inputId, errId, msg){ $(errId).textContent = msg; if(inputId) $(inputId).classList.toggle("bad", !!msg); return !msg; }
 
 $("leadForm").addEventListener("submit", ev=>{
   ev.preventDefault();
-  const name = $("fName").value.trim();
-  const email = $("fEmail").value.trim();
-  const phoneRaw = $("fPhone").value.trim();
+  const name = $("fName").value.trim(), email = $("fEmail").value.trim(), phoneRaw = $("fPhone").value.trim();
   const digits = phoneRaw.replace(/\D/g,"");
   let ok = true;
   ok = setErr("fName","eName", name.length < 2 ? "Please enter your name." : "") && ok;
@@ -643,7 +925,6 @@ $("leadForm").addEventListener("submit", ev=>{
   player = {name, email, phone: phoneRaw};
   try{ sessionStorage.setItem("stp_player", JSON.stringify(player)); }catch(e){}
   $("startBtn").disabled = true; $("startBtn").textContent = "Opening inbox…";
-  // don't make players wait on the network: start after the request or 1.5s, whichever is first
   Promise.race([postForm("players", {...player, consent:"yes"}), new Promise(r=>setTimeout(r,1500))]).then(()=>{
     $("startBtn").disabled = false; $("startBtn").textContent = "Open my inbox ▶";
     start();
@@ -656,19 +937,17 @@ function sendResults(score, missed, fa){
   postForm("results", {...player, score:`${score}/10`, phishing_missed:String(missed), legit_reported:String(fa), answers:summary});
 }
 
-function start(){ idx=0; answers=[]; playing=true; view("game"); renderEmail(); scrollToPlay(); }
-$("retryBtn").onclick = start;
+function start(){ idx=0; answers=[]; playing=true; finished=false; updateReady(); openApp(); }
+
 ["heroStart","bandStart"].forEach(id=>$(id).addEventListener("click",ev=>{
   ev.preventDefault();
-  if(playing || !$("result").classList.contains("hidden")) { scrollToPlay(); return; }
-  if(player) start(); else { scrollToPlay(); setTimeout(()=>$("fName").focus({preventScroll:true}), 600); }
+  if(!player){ scrollToPlay(); setTimeout(()=>$("fName").focus({preventScroll:true}), 600); return; }
+  if(playing) openApp(); else if(finished){ $("scorepage").classList.remove("hidden"); lock(true); } else start();
 }));
-if(player){ $("fName").value = player.name; $("fEmail").value = player.email; $("fPhone").value = player.phone; }
-$("copyBtn").onclick = async ()=>{
-  const t = `I scored ${$("score").textContent} on Spot the Phish 🎣 ${location.href.split("#")[0]}`;
-  try{ await navigator.clipboard.writeText(t); $("copyBtn").textContent="Copied ✓"; }catch(e){ $("copyBtn").textContent=t; }
-  setTimeout(()=>$("copyBtn").textContent="Copy my score",2500);
-};
+document.addEventListener("keydown", ev=>{
+  if(ev.key==="Escape"){ if($("sheet").classList.contains("on")) closeSheet(); }
+});
+updateReady();
 </script>
 </body>
 </html>

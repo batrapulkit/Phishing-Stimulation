@@ -37,6 +37,17 @@ No build step, no dependencies.
 Open `https://YOUR-SITE/qr.html` → **Download PNG** → put it on your slide.
 Also paste the link in the webinar chat. People watching on their phone can't scan their own screen.
 
+## Set your call-to-action (scorecard)
+At the end, players see a scorecard with a CTA button. Edit the `CONFIG` block near the
+bottom of `index.html` (search for `CONFIG`):
+
+```js
+ctaTitle:  "One click is all it takes. Is your team ready?",
+ctaButton: "Book a free security session →",
+ctaUrl:    "#",   // <-- your Calendly / WhatsApp / course / Google Form link
+```
+Commit and push; Vercel redeploys automatically.
+
 ## Notes
 - If you change `Code.gs` later, use **Deploy → Manage deployments → Edit → New version**, or the URL keeps running the old code.
 - The game never blocks on the network: if saving fails, the player can still play.
